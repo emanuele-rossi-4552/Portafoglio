@@ -1,0 +1,426 @@
+{
+ "versione": 1,
+ "strategia": {
+  "pavimentoLiquidita": 0.1,
+  "tettoCassaEuro": 50000.0,
+  "tassoCassa": 0.03,
+  "tassoCassaOltreTetto": 0.022,
+  "zonaNeutra": [
+   40.0,
+   60.0
+  ],
+  "frenoAttivoParametri": true,
+  "tolleranze": {
+   "Azionario": 0.05,
+   "Obbligazionario": 0.05,
+   "Oro": 0.03,
+   "Liquidità": 0.05
+  },
+  "scostLieve": 0.03,
+  "scostForte": 0.08,
+  "ordineMinimo": 500.0,
+  "aliquotaTitoliStato": 0.125,
+  "aliquotaAltri": 0.26,
+  "bollo": 0.002,
+  "curva": [
+   {
+    "p": 20.0,
+    "az": 0.9,
+    "ob": 0.0,
+    "oro": 0.0
+   },
+   {
+    "p": 32.5,
+    "az": 0.8,
+    "ob": 0.1,
+    "oro": 0.0
+   },
+   {
+    "p": 45.0,
+    "az": 0.5,
+    "ob": 0.1,
+    "oro": 0.01
+   },
+   {
+    "p": 57.5,
+    "az": 0.4,
+    "ob": 0.1,
+    "oro": 0.025
+   },
+   {
+    "p": 70.0,
+    "az": 0.2,
+    "ob": 0.1,
+    "oro": 0.04
+   }
+  ],
+  "mediaMobileMesi": 10
+ },
+ "mercato": {
+  "ticker": "EUNL.DE",
+  "alternativi": [
+   "SWDA.MI",
+   "EUNL.F",
+   "IWDA.AS"
+  ]
+ },
+ "bilanciamento": {
+  "parametri": {
+   "quotaMinEtf": 0.7,
+   "tettoAzioni": 0.3,
+   "parteTettoNonInvestita": "LIQUIDITÀ",
+   "baseLimiti": "PATRIMONIO TOTALE",
+   "pesoMedio": 0.01,
+   "pesoMax": 0.02,
+   "pesoMin": 0.005,
+   "quotaBase": 0.166666666666667,
+   "fasce": [
+    {
+     "nome": "Moderata",
+     "percentile": 0.75,
+     "quota": 0.333333333333333
+    },
+    {
+     "nome": "Forte",
+     "percentile": 0.9,
+     "quota": 0.666666666666667
+    },
+    {
+     "nome": "Eccezionale",
+     "percentile": 0.975,
+     "quota": 1.0
+    }
+   ],
+   "anniStoriaMin": 5.0,
+   "giorniPrezziVecchi": 7.0,
+   "arrotondamento": 10.0,
+   "limiteMensile": null,
+   "ribilanciamento": "SOLO BUFFER NULLO",
+   "bandaSovrappeso": 0.25,
+   "tolleranzaVendite": 0.1,
+   "ordineMinimo": null,
+   "commissione": 1.0,
+   "spreadEtf": 0.001,
+   "spreadAzioni": 0.0015,
+   "tassaTransazioni": {
+    "IT": 0.002,
+    "FR": 0.004,
+    "ES": 0.002
+   },
+   "aliquota": 0.26,
+   "guadagnoMinSpeculative": 0.0,
+   "graham": {
+    "verdetti": {
+     "Candidata": {
+      "fattore": 1.0,
+      "aumenti": true
+     },
+     "Interessante": {
+      "fattore": 0.8,
+      "aumenti": true
+     },
+     "Neutra": {
+      "fattore": 0.7,
+      "aumenti": false
+     },
+     "Scartare": {
+      "fattore": 0.0,
+      "aumenti": false
+     },
+     "Dati insufficienti": {
+      "fattore": null,
+      "aumenti": false
+     },
+     "In attesa dati": {
+      "fattore": null,
+      "aumenti": false
+     }
+    },
+    "margineMin": 0.3,
+    "giorniValidi": 45.0,
+    "variazioneMin": 5.0,
+    "aumentoMax": 1.5
+   },
+   "tolleranzaPrezzo": 0.03
+  },
+  "etf": [
+   {
+    "isin": "IE00BK5BQW10",
+    "nome": "FTSE North America USD (Acc)",
+    "ticker": "VNRA.DE",
+    "ter": 0.0008,
+    "distribuzione": "Acc",
+    "peso": 0.601941625472693
+   },
+   {
+    "isin": "IE00BCBJG560",
+    "nome": "MSCI World Small Cap USD (Acc)",
+    "ticker": "ZPRS.DE",
+    "ter": 0.0045,
+    "distribuzione": "Acc",
+    "peso": 0.0906768737417683
+   },
+   {
+    "isin": "IE00BKM4GZ66",
+    "nome": "Core MSCI EM IMI USD (Acc)",
+    "ticker": "IS3N.DE",
+    "ter": 0.0018,
+    "distribuzione": "Acc",
+    "peso": 0.121869709924728
+   },
+   {
+    "isin": "IE00BK5BQX27",
+    "nome": "FTSE Developed Europe EUR (Acc)",
+    "ticker": "VWCG.DE",
+    "ter": 0.001,
+    "distribuzione": "Acc",
+    "peso": 0.119494882881778
+   },
+   {
+    "isin": "IE00B52MJY50",
+    "nome": "Core MSCI Pacific ex-Japan (Acc)",
+    "ticker": "SXR1.DE",
+    "ter": 0.002,
+    "distribuzione": "Acc",
+    "peso": 0.0193380894502466
+   },
+   {
+    "isin": "IE00B4L5YX21",
+    "nome": "Core MSCI Japan IMI USD (Acc)",
+    "ticker": "EUNN.DE",
+    "ter": 0.0012,
+    "distribuzione": "Acc",
+    "peso": 0.0466788185287863
+   },
+   {
+    "isin": "IE00B5BMR087",
+    "nome": "Core S&P 500 USD (Acc)",
+    "ticker": "SXR8.DE",
+    "ter": 0.0007,
+    "distribuzione": "Acc",
+    "peso": 0.0,
+    "sostituitoDa": "IE00BK5BQW10"
+   }
+  ],
+  "speculativi": [
+   {
+    "isin": "LU0322250985",
+    "nome": "Xtrackers CAC 40 UCITS ETF 1D",
+    "ticker": "DX2G.DE",
+    "ter": 0.002,
+    "distribuzione": "Dist",
+    "regola": "Vendi appena proficuo"
+   }
+  ],
+  "azioni": [
+   {
+    "isin": "IT0000072618",
+    "nome": "Intesa Sanpaolo",
+    "ticker": "ISP.MI"
+   },
+   {
+    "isin": "JP3633400001",
+    "nome": "Toyota Motor"
+   },
+   {
+    "isin": "DK0062498333",
+    "nome": "Novo-Nordisk (B)"
+   },
+   {
+    "isin": "DE0005190003",
+    "nome": "BMW",
+    "ticker": "BMW.DE"
+   },
+   {
+    "isin": "FR0000125486",
+    "nome": "VINCI"
+   },
+   {
+    "isin": "US1491231015",
+    "nome": "Caterpillar"
+   }
+  ]
+ },
+ "graham": {
+  "aaaRiferimento": 4.4,
+  "aaaDefault": 6,
+  "formulaRivista": 1,
+  "gMax": 15,
+  "gMin": 0,
+  "coperturaMin": 0.6,
+  "sogliaCandidata": 75,
+  "sogliaInteressante": 55,
+  "sogliaNeutra": 40,
+  "allertaCalo52": -0.3,
+  "allertaSottoMedia200": 0,
+  "allertaUtiliAttesi": -0.2,
+  "criteri": [
+   {
+    "chiave": "rev",
+    "nome": "Dimensione: ricavi (M€)",
+    "soglia0": 300,
+    "soglia100": 800,
+    "peso": 5
+   },
+   {
+    "chiave": "cr",
+    "nome": "Current ratio",
+    "soglia0": 1,
+    "soglia100": 2,
+    "peso": 8
+   },
+   {
+    "chiave": "nd_ebitda",
+    "nome": "Debito netto / EBITDA",
+    "soglia0": 3,
+    "soglia100": 1,
+    "peso": 8
+   },
+   {
+    "chiave": "shr",
+    "nome": "Stabilità utili: quota di anni con utile > 0",
+    "soglia0": 0.75,
+    "soglia100": 1,
+    "peso": 8
+   },
+   {
+    "chiave": "divy",
+    "nome": "Storico dividendi (anni consecutivi)",
+    "soglia0": 0,
+    "soglia100": 20,
+    "peso": 7
+   },
+   {
+    "chiave": "cagr",
+    "nome": "Crescita EPS (CAGR annuo)",
+    "soglia0": 0,
+    "soglia100": 0.05,
+    "peso": 8
+   },
+   {
+    "chiave": "pe",
+    "nome": "P/E normalizzato (prezzo / EPS medio 3 anni)",
+    "soglia0": 25,
+    "soglia100": 15,
+    "peso": 10
+   },
+   {
+    "chiave": "pb",
+    "nome": "P/B (prezzo / valore contabile)",
+    "soglia0": 3,
+    "soglia100": 1.5,
+    "peso": 8
+   },
+   {
+    "chiave": "pepb",
+    "nome": "P/E x P/B",
+    "soglia0": 45,
+    "soglia100": 22.5,
+    "peso": 6
+   },
+   {
+    "chiave": "mos",
+    "nome": "Margine di sicurezza sul valore intrinseco",
+    "soglia0": 0,
+    "soglia100": 0.3,
+    "peso": 12
+   },
+   {
+    "chiave": "roe",
+    "nome": "ROE",
+    "soglia0": 0.05,
+    "soglia100": 0.1,
+    "peso": 6
+   },
+   {
+    "chiave": "ic",
+    "nome": "Copertura interessi (EBIT / interessi)",
+    "soglia0": 1.5,
+    "soglia100": 3,
+    "peso": 5
+   },
+   {
+    "chiave": "fcf",
+    "nome": "Free cash flow yield",
+    "soglia0": 0.03,
+    "soglia100": 0.05,
+    "peso": 5
+   },
+   {
+    "chiave": "pay",
+    "nome": "Payout ratio (dividendi / utili)",
+    "soglia0": 0.9,
+    "soglia100": 0.6,
+    "peso": 4
+   }
+  ]
+ },
+ "strumenti": [
+  {
+   "isin": "IE00B5BMR087",
+   "nome": "Core S&P 500 USD (Acc)",
+   "ticker": "SXR8.DE"
+  },
+  {
+   "isin": "IE00BCBJG560",
+   "nome": "MSCI World Small Cap USD (Acc)",
+   "ticker": "ZPRS.DE"
+  },
+  {
+   "isin": "IE00BKM4GZ66",
+   "nome": "Core MSCI EM IMI USD (Acc)",
+   "ticker": "IS3N.DE"
+  },
+  {
+   "isin": "IE00BK5BQX27",
+   "nome": "FTSE Developed Europe EUR (Acc)"
+  },
+  {
+   "isin": "IE00B52MJY50",
+   "nome": "Core MSCI Pacific ex-Japan (Acc)"
+  },
+  {
+   "isin": "IE00B4L5YX21",
+   "nome": "Core MSCI Japan IMI USD (Acc)"
+  },
+  {
+   "isin": "IE00BK5BQW10",
+   "nome": "FTSE NorthAmerica USD (Acc)"
+  },
+  {
+   "isin": "LU0322250985",
+   "nome": "CAC 40 EUR (Dist)"
+  },
+  {
+   "isin": "IT0000072618",
+   "nome": "Intesa Sanpaolo",
+   "ticker": "ISP.MI"
+  },
+  {
+   "isin": "JP3633400001",
+   "nome": "Toyota Motor"
+  },
+  {
+   "isin": "DK0062498333",
+   "nome": "Novo-Nordisk (B)"
+  },
+  {
+   "isin": "DE0005190003",
+   "nome": "BMW",
+   "ticker": "BMW.DE"
+  },
+  {
+   "isin": "FR0000125486",
+   "nome": "VINCI"
+  },
+  {
+   "isin": "US1491231015",
+   "nome": "Caterpillar"
+  },
+  {
+   "isin": "IE00B4ND3602",
+   "nome": "Physical Gold USD (Acc)",
+   "ticker": "4GLD.DE"
+  }
+ ]
+}
