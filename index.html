@@ -1,0 +1,1630 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pendolo Portafoglio</title>
+<meta name="description" content="Pendolo, allocazione e ribassi: cosa comprare e cosa vendere.">
+<meta name="theme-color" content="#EDF0F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1319" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pendolo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+/* Layout: una colonna da telefono, barra di navigazione in basso, schede con un solo compito ciascuna. */
+:root {
+  --bg: #EDF0F3; --surface: #FFFFFF; --surface2: #F5F7F9; --ink: #111C26; --ink2: #475766; --ink3: #6E7C8A;
+  --line: #D8DFE6; --accent: #1D4E7E; --accent-soft: #DCE8F3; --on-accent: #FFFFFF;
+  --buy: #0F6B4B; --buy-bg: #DFF2E9; --sell: #A93626; --sell-bg: #FAE5E1;
+  --warn: #7F5200; --warn-bg: #FAEFD0; --ok: #3F6B57; --ok-bg: #E6F0EB;
+  --fear: #3C78B8; --greed: #CB6E1F; --shadow: 0 1px 2px rgba(17,28,38,.06), 0 4px 14px rgba(17,28,38,.05);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1319; --surface: #151E27; --surface2: #1B2632; --ink: #E7EDF2; --ink2: #A8B6C3; --ink3: #8493A1;
+  --line: #27343F; --accent: #86B8E8; --accent-soft: #1B3249; --on-accent: #0D1319;
+  --buy: #62D3A3; --buy-bg: #12342A; --sell: #F2917F; --sell-bg: #3B1E1A;
+  --warn: #E6BB62; --warn-bg: #362B12; --ok: #8FC3A8; --ok-bg: #16302A;
+  --fear: #6EA8E2; --greed: #F0A35B; --shadow: none; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0D1319; --surface: #151E27; --surface2: #1B2632; --ink: #E7EDF2; --ink2: #A8B6C3; --ink3: #8493A1;
+  --line: #27343F; --accent: #86B8E8; --accent-soft: #1B3249; --on-accent: #0D1319;
+  --buy: #62D3A3; --buy-bg: #12342A; --sell: #F2917F; --sell-bg: #3B1E1A;
+  --warn: #E6BB62; --warn-bg: #362B12; --ok: #8FC3A8; --ok-bg: #16302A;
+  --fear: #6EA8E2; --greed: #F0A35B; --shadow: none; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.4;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 84px; -webkit-text-size-adjust: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+#app { max-width: 640px; margin: 0 auto; }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); padding: 12px 0 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.top h1 { font-size: 20px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+.top .sub { font-size: 12px; color: var(--ink3); min-width: 0; margin-top: 1px; }
+.top > div { min-width: 0; }
+#btnAgg { display: inline-flex; align-items: center; gap: 6px; flex: none; }
+#btnAgg svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+#btnAgg.on svg { animation: gira 1s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+input[type=checkbox] { accent-color: var(--accent); width: 20px; height: 20px; flex: none; }
+main { display: flex; flex-direction: column; gap: 12px; padding-bottom: 8px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); min-width: 0; }
+.card > h2 { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink3); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card > h2 .link { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.muted { color: var(--ink2); } .faint { color: var(--ink3); } small, .small { font-size: 12.5px; }
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.kpi { min-width: 0; } .kpi .l { font-size: 12px; color: var(--ink3); } .kpi .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; padding: 2px 8px; border-radius: 999px; background: var(--surface2); color: var(--ink2); white-space: nowrap; }
+.chip.buy { background: var(--buy-bg); color: var(--buy); } .chip.sell { background: var(--sell-bg); color: var(--sell); }
+.chip.warn { background: var(--warn-bg); color: var(--warn); } .chip.ok { background: var(--ok-bg); color: var(--ok); }
+.chip.info { background: var(--accent-soft); color: var(--accent); }
+button, .btn { font: inherit; font-weight: 600; font-size: 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 10px 14px; min-height: 44px; cursor: pointer; touch-action: manipulation; }
+button.pri { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+button.sm { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+button.ghost { background: transparent; } button.danger { color: var(--sell); }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, input:focus-visible, .tab:focus-visible, .pos:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a.link, .link { color: var(--accent); background: none; border: 0; padding: 0; min-height: 0; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+input, textarea { font: inherit; width: 100%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 10px 12px; min-height: 44px; }
+input.px { font-family: var(--mono); text-align: right; }
+label { font-size: 12.5px; color: var(--ink2); display: block; margin-bottom: 4px; }
+.banner { border-radius: 12px; padding: 10px 12px; font-size: 13.5px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.banner.warn { background: var(--warn-bg); color: var(--warn); } .banner.alert { background: var(--sell-bg); color: var(--sell); }
+.banner.sim { background: var(--accent-soft); color: var(--accent); font-weight: 600; } .banner.ok { background: var(--ok-bg); color: var(--ok); }
+.banner button { flex: none; }
+/* operazioni suggerite */
+.op { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.op:first-of-type { border-top: 0; }
+.op .nm { font-weight: 600; min-width: 0; overflow-wrap: anywhere; } .op .why { grid-column: 2 / 3; font-size: 12.5px; color: var(--ink2); }
+.op .amt { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; } .op .amt small { display: block; font-weight: 400; color: var(--ink3); }
+.op .go { grid-column: 3; }
+.empty { text-align: center; color: var(--ink2); padding: 8px 4px; }
+/* allocazione */
+.alloc { padding: 12px 0; border-top: 1px solid var(--line); } .alloc:first-of-type { border-top: 0; padding-top: 0; }
+.alloc .nums { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink2); flex-wrap: wrap; }
+.alloc .nums b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.act { font-weight: 600; margin-top: 4px; } .act.buy { color: var(--buy); } .act.sell { color: var(--sell); } .act.flat { color: var(--ink2); font-weight: 500; }
+svg { display: block; max-width: 100%; } svg text { font-family: var(--font); fill: var(--ink3); }
+/* posizioni */
+.pos { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 11px 0; border-top: 1px solid var(--line); cursor: pointer; width: 100%; text-align: left; background: none; border-left: 0; border-right: 0; border-bottom: 0; border-radius: 0; font-weight: 400; min-height: 56px; }
+.pos:first-of-type { border-top: 0; }
+.pos .n { font-weight: 500; overflow-wrap: anywhere; } .pos .v { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pos .s { font-size: 12.5px; color: var(--ink3); } .pos .s.r { text-align: right; font-variant-numeric: tabular-nums; }
+.gl-p { color: var(--buy); } .gl-n { color: var(--sell); }
+.pxrow { display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.pxrow:first-of-type { border-top: 0; }
+/* azionario */
+.etf { padding: 14px 0; border-top: 1px solid var(--line); } .etf:first-of-type { border-top: 0; padding-top: 0; }
+.etf .hd { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.etf .hd b { overflow-wrap: anywhere; min-width: 0; }
+.etf .hd .chip { flex: none; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.sim-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.sim-chips button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.note { font-size: 12.5px; color: var(--ink3); }
+/* navigazione */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line);
+  display: flex; justify-content: center; padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+.tabs-in { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; width: 100%; max-width: 640px; }
+.tab { font: inherit; font-size: 11.5px; font-weight: 500; color: var(--ink3); background: none; border: 0; border-radius: 10px; min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 4px 2px; }
+.tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tab[aria-current="page"] { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+/* foglio */
+#veil { position: fixed; inset: 0; background: rgba(8,14,20,.5); z-index: 40; display: none; }
+#veil.on { display: block; }
+#sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--surface); border-radius: 18px 18px 0 0; border: 1px solid var(--line); border-bottom: 0;
+  max-height: 90%; overflow-y: auto; transform: translateY(105%); transition: transform .22s ease; display: flex; justify-content: center;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); }
+#sheet.on { transform: none; }
+#sheet-in { width: 100%; max-width: 560px; padding: 16px 0 calc(20px + env(safe-area-inset-bottom, 0px)); }
+#sheet h3 { margin: 0 0 4px; font-size: 18px; font-weight: 600; } #sheet .lead { color: var(--ink2); font-size: 13.5px; margin: 0 0 14px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .seg button.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; } .fields .full { grid-column: 1 / -1; }
+.btns { display: flex; gap: 10px; margin-top: 14px; } .btns > * { flex: 1; }
+input[type=range] { padding: 0; min-height: 36px; accent-color: var(--accent); }
+#toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; opacity: 0; pointer-events: none; transition: .2s; z-index: 60; max-width: calc(100% - 32px); text-align: center; }
+#toast.on { opacity: 1; transform: translateX(-50%); }
+pre.log { font-family: var(--mono); font-size: 12px; background: var(--surface2); border-radius: 10px; padding: 10px; overflow-x: auto; margin: 8px 0 0; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; } .tbl th, .tbl td { text-align: right; padding: 6px 4px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; } .tbl th:first-child, .tbl td:first-child { text-align: left; }
+.tbl th { font-weight: 500; color: var(--ink3); border-top: 0; }
+.wrap-x { overflow-x: auto; }
+@media (prefers-reduced-motion: reduce) { #sheet, #toast { transition: none; } #btnAgg.on svg { animation: none; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top"><div><h1>Pendolo</h1><div class="sub" id="sub"></div></div>
+    <button id="btnAgg" class="sm pri" data-act="aggiorna" aria-label="Aggiorna i dati"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg><span>Aggiorna</span></button></header>
+  <main id="vista" aria-live="polite"></main>
+</div>
+<nav class="tabs" aria-label="Sezioni"><div class="tabs-in" id="tabs"></div></nav>
+<div id="veil"></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-hidden="true"><div id="sheet-in"></div></div>
+<div id="toast" role="status"></div>
+
+<script>
+/* Motore di calcolo dell'app: stesse regole di Portafoglio.xlsx (Cruscotto, Parametri) e
+   Bilanciamento.xlsx (Calcolo, ETF, Azioni). Funzioni pure: stato in ingresso, risultati in uscita. */
+(function (root) {
+  'use strict';
+
+  var CLASSI = ['Azionario', 'Obbligazionario', 'Oro', 'Liquidità'];
+  var BIG = 9e15;
+
+  function isNum(x) { return typeof x === 'number' && isFinite(x); }
+  function num(x, d) { return isNum(x) ? x : (d === undefined ? null : d); }
+  function clamp(x, a, b) { return Math.min(b, Math.max(a, x)); }
+  function eur0(x) { return Math.round(x).toLocaleString('it-IT'); }
+  function pct0(x) { return (x * 100).toFixed(0) + '%'; }
+  function fx(x, d) { return Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function floorTo(x, step) { step = Math.max(1, step || 1); return Math.floor(x / step + 1e-9) * step; }
+  function ceilTo(x, step) { step = Math.max(1, step || 1); return Math.ceil(x / step - 1e-9) * step; }
+  function giorniTra(isoA, dataB) {
+    if (!isoA) return null;
+    var a = new Date(isoA.length <= 10 ? isoA + 'T00:00:00' : isoA);
+    var b = new Date(dataB.getFullYear(), dataB.getMonth(), dataB.getDate());
+    var a0 = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+    return Math.round((b - a0) / 86400000);
+  }
+  function meseChiave(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+
+  /* ------------------------------------------------------------ posizioni */
+  function valorePosizione(p) {
+    var q = num(p.qta, 0), px = num(p.prezzo, 0);
+    return p.tipo === 'Obbligazione' ? q * px / 100 : q * px;
+  }
+
+  /* ------------------------------------------------------------ curva */
+  function dalleCurva(curva, x) {
+    var n = curva.length, g, h;
+    if (x <= curva[0].p) { g = 0; h = 0; }
+    else if (x >= curva[n - 1].p) { g = n - 2; h = 1; }
+    else {
+      g = 0;
+      for (var i = 0; i < n; i++) if (curva[i].p <= x) g = i;
+      h = (x - curva[g].p) / (curva[g + 1].p - curva[g].p);
+    }
+    var lerp = function (k) { return curva[g][k] + (curva[g + 1][k] - curva[g][k]) * h; };
+    var az = lerp('az'), ob = lerp('ob'), oro = lerp('oro');
+    return { az: az, ob: ob, oro: oro, liq: 1 - az - ob - oro, segmento: g + 1, frazione: h };
+  }
+
+  /* ------------------------------------------------------------ Portafoglio */
+  /* st: {snap, posizioni, pendolo:{punteggio, riferimento}, mercato:{sottoMedia}}
+     opt: {punteggio} per provare un altro punteggio */
+  function calcolaPortafoglio(st, opt) {
+    opt = opt || {};
+    var S = st.snap.portafoglio.strategia;
+    var val = { 'Azionario': 0, 'Obbligazionario': 0, 'Oro': 0, 'Liquidità': 0 };
+    var costoTot = 0, valTot = 0;
+    st.posizioni.forEach(function (p) {
+      if (p.archiviata) return;
+      var v = valorePosizione(p);
+      if (val[p.classe] !== undefined) val[p.classe] += v;
+      valTot += v; costoTot += num(p.costo, 0);
+    });
+    var tot = CLASSI.reduce(function (s, c) { return s + val[c]; }, 0);
+    var low = S.zonaNeutra[0], high = S.zonaNeutra[1];
+    var oggiP = opt.punteggio != null ? clamp(opt.punteggio, 0, 100) : num(st.pendolo.punteggio);
+    var out = { valori: val, totale: tot, costoTotale: costoTot, punteggioOggi: oggiP, ok: oggiP != null && tot > 0 };
+    var pesi = {};
+    CLASSI.forEach(function (c) { pesi[c] = tot > 0 ? val[c] / tot : 0; });
+    out.pesi = pesi;
+    if (oggiP == null || tot <= 0) { out.righe = []; return out; }
+
+    var fuori = (oggiP <= low || oggiP >= high || low >= high);
+    var rif, rifNota;
+    if (opt.punteggio != null) { rif = oggiP; rifNota = 'punteggio di prova: la zona neutra non si applica'; }
+    else if (fuori) { rif = oggiP; rifNota = 'fuori dalla zona neutra ' + low + '-' + high + ': vale il punteggio di oggi'; }
+    else { rif = num(st.pendolo.riferimento, oggiP); rifNota = 'dentro la zona neutra ' + low + '-' + high + ': vale l’ultimo punteggio fuori dalla zona'; }
+    out.punteggioRif = rif; out.riferimentoNota = rifNota; out.fuoriZona = fuori;
+
+    // 1. curva
+    var c = dalleCurva(S.curva, rif);
+    var passo = { curva: { Azionario: c.az, Obbligazionario: c.ob, Oro: c.oro, 'Liquidità': c.liq } };
+    // 2. pavimento della liquidità
+    var liq57 = Math.max(S.pavimentoLiquidita, c.liq);
+    var az57 = c.az - (liq57 - c.liq);
+    // 3. freno
+    var az58 = az57, frenoAttivo = false;
+    var sotto = st.mercato && st.mercato.sottoMedia === true;
+    if (S.frenoAttivoParametri && sotto && az57 > pesi.Azionario) { az58 = pesi.Azionario; frenoAttivo = true; }
+    var liq58 = liq57 + (az57 - az58);
+    // 4. tetto in euro sulla cassa
+    var liq59 = S.tettoCassaEuro > 0 && tot > 0 ? Math.min(liq58, S.tettoCassaEuro / tot) : liq58;
+    var ob59 = c.ob + (liq58 - liq59);
+    var ob = { Azionario: az58, Obbligazionario: ob59, Oro: c.oro, 'Liquidità': liq59 };
+    passo.pavimento = { Azionario: az57, Obbligazionario: c.ob, Oro: c.oro, 'Liquidità': liq57 };
+    passo.freno = { Azionario: az58, Obbligazionario: c.ob, Oro: c.oro, 'Liquidità': liq58 };
+    passo.tetto = ob;
+    out.passi = passo; out.obiettivi = ob;
+    out.freno = {
+      parametroAttivo: !!S.frenoAttivoParametri, sottoMedia: st.mercato ? st.mercato.sottoMedia : null,
+      scostamento: st.mercato ? st.mercato.scostamento : null, attivo: frenoAttivo
+    };
+    out.tettoCassaAttivo = liq59 < liq58 - 1e-12;
+
+    // 5. fasce, segnali, importi
+    var righe = [];
+    var somma3 = 0;
+    CLASSI.forEach(function (cl) {
+      var D = ob[cl], tol = S.tolleranze[cl];
+      var mn = Math.max(0, D - tol), mx = Math.min(1, D + tol);
+      var W = pesi[cl];
+      var G = W < mn ? W - mn : (W > mx ? W - mx : 0);
+      var sign = G === 0 ? 'IN FASCIA' : ((G < 0 ? 'SOTTO ' : 'SOPRA ') +
+        (Math.abs(G) >= S.scostForte ? '(forte)' : (Math.abs(G) >= S.scostLieve ? '(medio)' : '(lieve)')));
+      var I = 0;
+      if (cl !== 'Liquidità') { I = G === 0 ? 0 : D * tot - val[cl]; somma3 += I; }
+      righe.push({ classe: cl, valore: val[cl], peso: W, obiettivo: D, min: mn, max: mx, scostamento: G, segnale: sign, daMuovere: I });
+    });
+    var liqRiga = righe[3]; liqRiga.daMuovere = -somma3;
+    righe.forEach(function (r) {
+      if (r.classe === 'Liquidità') {
+        r.azione = Math.abs(r.daMuovere) < 1 ? 'ferma' : (r.daMuovere < 0 ? 'scende comprando le altre classi' : 'sale vendendo le altre classi');
+      } else if (r.scostamento === 0) r.azione = 'ferma: dentro la fascia';
+      else if (Math.abs(r.daMuovere) < S.ordineMinimo) r.azione = 'aspetta il mese prossimo: sotto l’ordine minimo';
+      else r.azione = (r.daMuovere > 0 ? 'COMPRA ' : 'VENDI ') + eur0(Math.abs(r.daMuovere)) + ' €';
+    });
+    out.righe = righe;
+    out.buffer = righe[0].daMuovere;
+    out.rendita = null;
+    return out;
+  }
+
+  /* ------------------------------------------------------------ percentile del ribasso */
+  function percentileRibasso(dd, s) {
+    if (dd >= 0) return 0;
+    var pts = [[0, 0]];
+    if (isNum(s.ribassoMax)) pts.push([s.ribassoMax, 1]);
+    (s.soglieRibasso || []).forEach(function (x, i) { if (isNum(x)) pts.push([x, [0.75, 0.9, 0.975][i]]); });
+    if (isNum(s.ribasso) && isNum(s.percentile)) pts.push([s.ribasso, s.percentile]);
+    pts.sort(function (a, b) { return a[0] - b[0]; });
+    // pct non cala al calare del ribasso (dd piu' negativo -> pct piu' alto)
+    for (var i = pts.length - 2; i >= 0; i--) pts[i][1] = Math.max(pts[i][1], pts[i + 1][1]);
+    if (dd <= pts[0][0]) return pts[0][1];
+    for (var k = 0; k < pts.length - 1; k++) {
+      var a = pts[k], b = pts[k + 1];
+      if (dd >= a[0] && dd <= b[0]) {
+        if (b[0] === a[0]) return Math.max(a[1], b[1]);
+        return a[1] + (b[1] - a[1]) * (dd - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return 0;
+  }
+
+  /* ------------------------------------------------------------ Bilanciamento */
+  /* st aggiunge: operazioni [{ts, isin, verso, importo}], oggi (Date) */
+  function calcolaBilanciamento(st, pf, opt) {
+    opt = opt || {};
+    var B = st.snap.bilanciamento, PA = B.parametri, G = PA.graham;
+    var oggi = st.oggi || new Date();
+    var arrot = Math.max(1, PA.arrotondamento || 1);
+    var res = { avvisi: [] };
+
+    // --- posizioni raggruppate per ISIN
+    var perIsin = {};
+    st.posizioni.forEach(function (p) {
+      if (p.archiviata || !p.isin) return;
+      if (p.classe !== 'Azionario') return;
+      var o = perIsin[p.isin] || (perIsin[p.isin] = { valore: 0, costo: 0, qta: 0, prezzo: null, tipi: {}, nome: p.nome });
+      o.valore += valorePosizione(p); o.costo += num(p.costo, 0); o.qta += num(p.qta, 0);
+      o.prezzo = num(p.prezzo, o.prezzo); o.tipi[p.tipo] = true;
+    });
+    function datiEtf(isin) { var o = perIsin[isin]; return o && o.tipi.ETF ? o : null; }
+    function datiAz(isin) { var o = perIsin[isin]; return o && o.tipi.Azione ? o : null; }
+
+    // --- acquisti e vendite del mese
+    var chiaveMese = meseChiave(oggi);
+    var compMese = {}, vendMese = {};
+    if (st.snap.fonti && st.snap.fonti.meseDati === chiaveMese) {
+      Object.keys(B.compratoMese || {}).forEach(function (k) { compMese[k] = B.compratoMese[k]; });
+      Object.keys(B.vendutoMese || {}).forEach(function (k) { vendMese[k] = B.vendutoMese[k]; });
+    }
+    var tSnap = isNum(st.tOps) ? st.tOps : (st.snap.generato ? new Date(st.snap.generato).getTime() : 0);
+    (st.operazioni || []).forEach(function (o) {
+      if (o.annullata) return;
+      var d = new Date(o.ts);
+      if (meseChiave(d) !== chiaveMese || d.getTime() <= tSnap) return;
+      var tgt = o.verso === 'COMPRA' ? compMese : vendMese;
+      tgt[o.isin] = (tgt[o.isin] || 0) + o.importo;
+    });
+    var B55 = 0;
+    st.posizioni.forEach(function () { });
+    Object.keys(compMese).forEach(function (k) { if (perIsin[k]) B55 += compMese[k]; });
+
+    // --- Calcolo
+    var B5 = pf.valori.Azionario, B6 = pf.buffer, B9 = B6, B10 = B5 + B6, B11 = pf.totale;
+    var B12 = PA.baseLimiti === 'AZIONARIO AUTORIZZATO' ? B10 : B11;
+    var B13 = isNum(PA.ordineMinimo) ? PA.ordineMinimo : (isNum(st.snap.portafoglio.strategia.ordineMinimo) ? st.snap.portafoglio.strategia.ordineMinimo : 500);
+    var B14 = isNum(PA.aliquota) ? PA.aliquota : 0.26;
+    var B16 = PA.quotaMinEtf, B17 = PA.tettoAzioni;
+
+    var etfDef = B.etf.slice(0, 8), specDef = B.speculativi.slice(0, 2);
+    var etfV = etfDef.map(function (e) { var o = datiEtf(e.isin); return o ? o.valore : 0; });
+    var specV = specDef.map(function (e) { var o = datiEtf(e.isin); return o ? o.valore : 0; });
+    var azDef = B.azioni.slice(0, 12);
+    var azV = azDef.map(function (a) { var o = datiAz(a.isin); return o ? o.valore : 0; });
+    var B18 = etfV.reduce(function (a, b) { return a + b; }, 0);
+    var B19 = specV.reduce(function (a, b) { return a + b; }, 0);
+    var B20 = azV.reduce(function (a, b) { return a + b; }, 0);
+    var B21 = Math.max(0, Math.round((B5 - B18 - B19 - B20) * 100) / 100);
+    var B22 = B20, B23 = B17 * B10;
+    var B29 = B12 * PA.pesoMax, B30 = B12 * PA.pesoMedio, B31 = B12 * PA.pesoMin, B32 = isNum(G.margineMin) ? G.margineMin : 0.3;
+
+    // validita' dei dati
+    var etaSnap = st.snap.generato ? giorniTra(st.snap.generato, oggi) : 999;
+    var sommaPesi = etfDef.reduce(function (s, e) { return s + e.peso; }, 0);
+    var B38 = (etaSnap <= 35 && Math.abs(sommaPesi - 1) <= 0.0005 && etfDef.length > 0) ? 1 : 0;
+    var motivoBlocco = B38 ? '' : (etaSnap > 35 ? 'Dati importati dal PC vecchi di ' + etaSnap + ' giorni: importane di nuovi.' : 'Paniere ETF non valido: i pesi non sommano 100%.');
+
+    var B24 = PA.parteTettoNonInvestita === 'ETF CORE' ? null : B16 * B10; // sotto si completa con Azioni K22
+
+    // --- AZIONI (primo passo: obiettivo, vendite livello 1)
+    var az = azDef.map(function (a, i) {
+      var o = datiAz(a.isin) || { valore: 0, costo: 0, qta: 0, prezzo: null };
+      var I = azV[i];
+      var prezzoEur = o.prezzo;
+      var valoreStimatoEur = a.valoreStimatoEur;
+      var cambio = isNum(a.cambioLocale) && a.cambioLocale > 0 ? a.cambioLocale : null;
+      var margine = (cambio && isNum(a.valoreLocale) && a.valoreLocale > 0 && isNum(prezzoEur) && prezzoEur > 0) ? 1 - prezzoEur * cambio / a.valoreLocale : null;
+      var gg = giorniTra(a.aggiornato, oggi);
+      var stato;
+      if (!isNum(a.punteggio)) stato = 'MANCANTI';
+      else if (a.verdetto === 'Dati insufficienti' || a.verdetto === 'In attesa dati' || !a.verdetto) stato = 'INSUFFICIENTI';
+      else if (a.esito && String(a.esito).slice(0, 6) === 'ERRORE') stato = 'ERRORE';
+      else if (gg == null) stato = 'SENZA DATA';
+      else if (gg > G.giorniValidi) stato = 'NON AGGIORNATI';
+      else stato = 'OK';
+      var regola = (G.verdetti && G.verdetti[a.verdetto]) || null;
+      var AW = (stato === 'OK' && isNum(a.punteggio) && isNum(a.punteggioRiferimento) && a.punteggioRiferimento > 0) ? a.punteggio - a.punteggioRiferimento : null;
+      var AC = stato === 'OK' && regola && regola.aumenti ? 'SI' : 'NO';
+      var AX;
+      if (AW == null) AX = 1;
+      else if (Math.abs(AW) < G.variazioneMin) AX = 1;
+      else if (AW < 0) AX = a.punteggio / a.punteggioRiferimento;
+      else AX = AC === 'SI' ? Math.min(G.aumentoMax, a.punteggio / a.punteggioRiferimento) : 1;
+      var AB;
+      if (stato !== 'OK') AB = 1;
+      else {
+        var f = regola && isNum(regola.fattore) ? regola.fattore : 1;
+        AB = f * AX;
+      }
+      var Jref = isNum(a.riferimento) ? a.riferimento : o.costo;
+      var AD = Math.min(Jref, B29) * AB;
+      var K = AD < B31 ? 0 : Math.min(AD, B29);
+      var AE = 0;
+      if (B38 && I > 0) {
+        if (K === 0) AE = I;
+        else if (AB < 1) AE = (I - K >= B13) ? Math.min(I, ceilTo(I - K, arrot)) : 0;
+        else AE = (I - B29 >= B13) ? Math.min(I, ceilTo(I - B29, arrot)) : 0;
+      }
+      return {
+        isin: a.isin, nome: a.nome, def: a, valore: I, costo: o.costo, qta: o.qta, prezzo: prezzoEur,
+        punteggio: a.punteggio, verdetto: a.verdetto, valoreStimatoEur: valoreStimatoEur, margine: margine,
+        stato: stato, AW: AW, AC: AC, AX: AX, AB: AB, AD: AD, K: K, AE: AE, F: I - AE, rigaExcel: 10 + i,
+        riferimento: Jref, allerte: a.allerte
+      };
+    });
+    var B42 = az.reduce(function (s, r) { return s + r.AE; }, 0);
+
+    // --- speculative: vendita appena proficua
+    var spec = specDef.map(function (e, j) {
+      var o = datiEtf(e.isin) || { valore: 0, costo: 0, qta: 0, prezzo: null };
+      var F = specV[j], U = o.costo;
+      var BE = F > 0 ? (F - U) - Math.max(0, F - U) * B14 - PA.commissione - F * PA.spreadEtf : null;
+      var AR = (B38 && F > 0 && BE != null && BE > PA.guadagnoMinSpeculative) ? F : 0;
+      var BF = null;
+      if (F > 0 && isNum(o.prezzo) && o.prezzo > 0 && o.qta > 0) {
+        BF = (PA.guadagnoMinSpeculative + PA.commissione + U * (1 - B14)) / ((F / o.prezzo) * (1 - B14 - PA.spreadEtf));
+      }
+      return { def: e, isin: e.isin, nome: e.nome, F: F, U: U, V: F - U, BE: BE, AR: AR, BF: BF, prezzo: o.prezzo, qta: o.qta, rigaExcel: 17 + j };
+    });
+    var B43 = spec.reduce(function (s, r) { return s + r.AR; }, 0);
+
+    // --- livello 2 (azioni sopra il tetto)
+    var B44 = B38 ? Math.max(0, B22 - B42 - B23) : 0;
+    az.forEach(function (r, i) {
+      r.AG = r.F > 0 ? (isNum(r.punteggio) ? r.punteggio : 1000) * 1e6 - r.F + r.rigaExcel / 1000 : BIG;
+    });
+    az.forEach(function (r) {
+      r.AH = (B44 <= 0 || r.AG >= BIG) ? 0 : az.filter(function (x) { return x.AG < r.AG; }).length + 1;
+    });
+    az.forEach(function (r) {
+      if (r.AH === 0) { r.AI = 0; return; }
+      var prima = az.reduce(function (s, x) { return s + (x.AH > 0 && x.AH < r.AH ? x.F : 0); }, 0);
+      var rest = B44 - prima;
+      if (rest <= 0) { r.AI = 0; return; }
+      var base = Math.min(r.F, Math.max(Math.min(B13, r.F), rest));
+      if (r.F - base < B31) r.AI = r.F;
+      else r.AI = Math.min(r.F, Math.max(Math.min(B13, r.F), ceilTo(base, arrot)));
+    });
+    var B45 = az.reduce(function (s, r) { return s + r.AI; }, 0);
+    az.forEach(function (r) { r.AJ = Math.max(0, r.AE + r.AI); });
+    var B41 = Math.max(0, -B9);
+    var B46 = B38 ? Math.max(0, B41 - B42 - B43 - B45) : 0;
+
+    // --- rinforzi azioni
+    var B52 = B22 - B42 - B45, B53 = Math.max(0, B23 - B52);
+    var B56 = isNum(PA.limiteMensile) ? Math.max(0, PA.limiteMensile - B55) : Math.max(0, B9);
+    az.forEach(function (r) {
+      var AT = isNum(r.margine) ? r.margine : -9; r.AT = AT;
+      r.AL = (B38 && B9 > 0 && r.AJ === 0 && r.AC === 'SI' && isNum(r.margine) && AT >= B32 && r.K - r.valore >= B13) ? r.K - r.valore : 0;
+    });
+    az.forEach(function (r, i) {
+      r.AM = r.AL === 0 ? 0 : az.filter(function (x) { return x.AL > 0 && x.AT > r.AT; }).length +
+        az.filter(function (x, j) { return x.AL > 0 && x.AT === r.AT && j < i; }).length + 1;
+    });
+    az.forEach(function (r) {
+      if (r.AM === 0) { r.AN = 0; return; }
+      var prima = az.reduce(function (s, x) { return s + (x.AM > 0 && x.AM < r.AM ? x.AL : 0); }, 0);
+      var disp = Math.min(B53, Math.max(0, B9), B56) - prima;
+      var q = floorTo(Math.max(0, Math.min(r.AL, disp)), arrot);
+      r.AN = q >= B13 ? q : 0;
+    });
+    var B54 = az.reduce(function (s, r) { return s + r.AN; }, 0);
+    az.forEach(function (r) {
+      r.N = r.AN - r.AJ;
+      var paese = (r.isin || '').slice(0, 2);
+      var tx = (PA.tassaTransazioni && PA.tassaTransazioni[paese]) || 0;
+      r.costoTx = r.AN > 0 ? r.AN * tx : 0;
+      r.costoComm = r.N !== 0 ? PA.commissione : 0;
+      r.costoSpread = Math.abs(r.N) * PA.spreadAzioni;
+      r.costi = r.costoTx + r.costoComm + r.costoSpread;
+      var AR = (r.AJ > 0 && r.valore > 0) ? r.AJ - r.AJ * r.costo / r.valore : 0;
+      r.plus = AR; r.imposta = Math.max(0, AR) * B14; r.minus = Math.max(0, -AR);
+      r.guadagnoLatente = r.valore - r.costo;
+    });
+
+    // --- ETF core
+    var N = etfDef.length;
+    var ETF = etfDef.map(function (e, i) {
+      var o = datiEtf(e.isin) || { valore: 0, costo: 0, qta: 0, prezzo: null };
+      var s = e.storico || null;
+      var price = isNum(o.prezzo) && o.qta > 0 ? o.prezzo : (s ? s.ultimoPrezzo : null);
+      return { def: e, isin: e.isin, nome: e.nome, F: etfV[i], U: o.costo, qta: o.qta, prezzo: price, s: s, peso: e.peso, riga: 9 + i, inEsaurimento: !!e.sostituitoDa };
+    });
+    var isinCore = {};
+    ETF.forEach(function (r) { isinCore[r.isin] = true; });
+    // obiettivo
+    ETF.forEach(function (r) {
+      var cont = ETF.reduce(function (s, x) { return s + (x.def.sostituitoDa === r.isin ? x.F : 0); }, 0);
+      r.contenuti = cont;
+    });
+    var B24v = B24 === null ? null : B24;
+    if (B24v === null) {
+      var Ksum = az.reduce(function (s, r) { return s + r.K; }, 0);
+      B24v = Math.max(B16 * B10, B10 - Ksum - B19 - B21);
+    }
+    ETF.forEach(function (r) {
+      if (r.inEsaurimento) {
+        var rep = r.def.sostituitoDa;
+        if (!isinCore[rep]) r.G = r.F;
+        else {
+          var sumF = ETF.reduce(function (s, x) { return s + (x.def.sostituitoDa === rep ? x.F : 0); }, 0);
+          var Dp = ETF.reduce(function (s, x) { return s + (x.isin === rep ? x.peso : 0); }, 0);
+          r.G = sumF > 0 ? r.F * Math.min(1, Dp * B24v / sumF) : 0;
+        }
+      } else r.G = Math.max(0, r.peso * B24v - r.contenuti);
+      r.H = r.G - r.F; r.I = r.G > 0 ? r.H / r.G : 0;
+      r.Y = compMese[r.isin] || 0;
+      r.X = r.H; // ordini gia' inviati: 0 (le operazioni si registrano subito)
+    });
+
+    // stato dei dati e fasce
+    function statoDati(r) {
+      var s = r.s;
+      if (!s) return 'DATI MANCANTI';
+      if (s.stato !== 'OK' && s.stato !== 'STORICO BREVE') return s.stato || 'DATI MANCANTI';
+      return s.stato;
+    }
+    var etaPrezzi = null;
+    ETF.forEach(function (r) {
+      r.O = statoDati(r);
+      var s = r.s;
+      r.etaStorico = s ? giorniTra(s.ultimaData, oggi) : null;
+      r.max12 = s && isNum(s.max12) ? Math.max(s.max12, r.prezzo || 0) : null;
+      r.dd = (r.max12 && isNum(r.prezzo)) ? Math.min(0, r.prezzo / r.max12 - 1) : null;
+      r.N_ = (r.dd != null && s) ? percentileRibasso(r.dd, s) : null;
+      var sg = s && s.soglieRibasso ? s.soglieRibasso : [];
+      r.livelli = (r.max12 && sg.length === 3 && sg.every(isNum)) ? sg.map(function (x) { return r.max12 * (1 + x); }) : null;
+      var fa = PA.fasce;
+      var AH = 0;
+      if (r.O === 'OK' && r.dd != null && r.livelli && r.X >= B13) {
+        if (r.prezzo <= r.livelli[2]) AH = 3; else if (r.prezzo <= r.livelli[1]) AH = 2; else if (r.prezzo <= r.livelli[0]) AH = 1;
+      }
+      r.AH = AH;
+      if (r.etaStorico != null && r.etaStorico > PA.giorniPrezziVecchi && s) res.avvisi.push('Soglie di ribasso di ' + r.nome + ' calcolate ' + r.etaStorico + ' giorni fa.');
+    });
+    // modo acquisti
+    var B50 = (B38 && B9 >= 0 && (PA.ribilanciamento === 'SEMPRE' || (PA.ribilanciamento === 'SOLO BUFFER NULLO' && B6 === 0))) ? 1 : 0;
+    ETF.forEach(function (r) {
+      r.AQ = (B50 === 1 && r.F > r.G * (1 + PA.bandaSovrappeso) && r.F - r.G >= B13) ? floorTo(r.F - r.G, arrot) : 0;
+    });
+    var B51 = ETF.reduce(function (s, r) { return s + r.AQ; }, 0);
+    var B59 = !B38 ? 'NESSUNO' : (B9 > 0 ? 'BUFFER' : ((B50 === 1 && B51 > 0) ? 'RIBILANCIAMENTO' : 'NESSUNO'));
+    var B57 = (B38 && B9 > 0) ? Math.max(0, Math.min(B9, B56) - B54) : 0;
+    var B58 = B57 > 0 ? Math.max(0, Math.min(B57, PA.quotaBase * (Math.max(0, B9) + B55) - B55)) : 0;
+    var B60 = B59 === 'BUFFER' ? B57 + (B50 === 1 ? B51 : 0) : (B59 === 'RIBILANCIAMENTO' ? B51 : 0);
+    ETF.forEach(function (r) {
+      var okDati = r.O === 'OK' || r.O === 'STORICO BREVE';
+      r.AG = (!r.inEsaurimento && B38 === 1 && B59 !== 'NESSUNO' && okDati && r.X >= B13) ? 1 : 0;
+      var AI = 0;
+      if (r.AG && r.AH > 0) {
+        var frac = PA.fasce[r.AH - 1].quota;
+        var v = frac * (r.X + r.Y) - r.Y;
+        if (v <= 0) AI = 0;
+        else if (r.Y > 0) AI = v >= B13 ? Math.min(r.X, v) : 0;
+        else AI = Math.min(r.X, Math.max(B13, v));
+      }
+      r.AI = AI;
+    });
+    ETF.forEach(function (r, i) {
+      r.AJ = (r.AG === 1 && r.AH === 0)
+        ? ETF.filter(function (x) { return x.AG === 1 && x.AH === 0 && x.I > r.I; }).length +
+          ETF.filter(function (x, j) { return x.AG === 1 && x.AH === 0 && x.I === r.I && j < i; }).length + 1
+        : 0;
+    });
+    ETF.forEach(function (r) {
+      if (r.AJ === 0) { r.AK = 0; return; }
+      var prima = ETF.reduce(function (s, x) { return s + (x.AJ > 0 && x.AJ < r.AJ ? x.X : 0); }, 0);
+      var t = Math.max(0, Math.min(r.X, B58 - prima));
+      r.AK = t < B13 ? 0 : t;
+    });
+    ETF.forEach(function (r) {
+      r.AL = r.AG === 0 ? 0 : (B59 === 'RIBILANCIAMENTO' ? r.X : (r.AH > 0 ? r.AI : r.AK));
+      r.AM = r.AL > 0 ? r.AH * 1000 + (r.AH > 0 ? (r.N_ || 0) : r.I) * 100 + (100 - r.riga) / 10000 : -1;
+    });
+    ETF.forEach(function (r) { r.AN = r.AM < 0 ? 0 : ETF.filter(function (x) { return x.AM > r.AM; }).length + 1; });
+    ETF.forEach(function (r) {
+      if (r.AN === 0) { r.AO = 0; return; }
+      var prima = ETF.reduce(function (s, x) { return s + (x.AN > 0 && x.AN < r.AN ? x.AL : 0); }, 0);
+      r.AO = Math.max(0, Math.min(r.AL, B60 - prima));
+      var q = floorTo(r.AO, arrot);
+      r.AP = q >= B13 ? q : 0;
+    });
+    ETF.forEach(function (r) { if (r.AP === undefined) r.AP = 0; r.AR = 0; });
+
+    // --- livello 3: vendite di ETF (buffer negativo)
+    var rowsAll = ETF.concat(spec.map(function (s) {
+      return { isin: s.isin, nome: s.nome, F: s.F, G: 0, U: s.U, AQ: 0, AR: s.AR, riga: s.rigaExcel, spec: true, ref: s };
+    }));
+    rowsAll.forEach(function (r) {
+      var tol = PA.tolleranzaVendite;
+      if (r.spec) r.AS = B46 <= 0 ? 0 : Math.max(0, r.F - r.AR);
+      else r.AS = B46 <= 0 ? 0 : Math.max(0, r.F - r.AQ - r.G * (1 - tol));
+      r.AT = r.F > 0 ? Math.max(0, (r.F - r.U) / r.F) * B14 : 0;
+      r.AU = (r.AS > 0 && (r.AS >= B13 || r.AS >= r.F - 0.005)) ? r.AT * 1e6 - (r.F - r.G) / 1e6 + r.riga / 1e9 : BIG;
+    });
+    rowsAll.forEach(function (r) { r.AV = r.AU >= BIG ? 0 : rowsAll.filter(function (x) { return x.AU < r.AU; }).length + 1; });
+    rowsAll.forEach(function (r) {
+      var prima = rowsAll.reduce(function (s, x) { return s + (x.AV > 0 && x.AV < r.AV ? x.AS : 0); }, 0);
+      var rest = B46 - prima;
+      if (r.AV === 0 || rest <= 0) { r.AW = 0; return; }
+      var m = Math.min(r.AS, Math.max(Math.min(B13, r.AS), rest));
+      if (m >= r.AS - 0.005) r.AW = r.AS;
+      else r.AW = Math.max(Math.min(B13, r.AS), Math.min(r.AS, ceilTo(m, arrot)));
+    });
+    var B47 = rowsAll.reduce(function (s, r) { return s + r.AW; }, 0);
+    var B48 = Math.max(0, B46 - B47);
+    rowsAll.forEach(function (r) {
+      r.AX = r.AQ + r.AR + r.AW;
+      var AY = (r.AX > 0 && r.F > 0) ? r.AX - r.AX * r.U / r.F : 0;
+      r.plus = AY; r.imposta = Math.max(0, AY) * B14; r.minus = Math.max(0, -AY);
+      r.costoComm = ((r.AP || 0) > 0 || r.AX > 0) ? PA.commissione : 0;
+      r.costoSpread = ((r.AP || 0) + r.AX) * PA.spreadEtf;
+      r.costi = r.costoComm + r.costoSpread;
+      r.importo = (r.AP || 0) - r.AX;
+      r.guadagnoLatente = r.F - r.U;
+    });
+
+    // --- testo di stato degli ETF
+    ETF.forEach(function (r) {
+      var f = PA.fasce, nomeFascia = r.AH > 0 ? f[r.AH - 1].nome.toLowerCase() : '';
+      var t;
+      if (!B38) t = 'BLOCCATO';
+      else if (r.AX > 0) t = r.AW > 0 ? 'VENDI: riduzione dell’azionario' : 'VENDI: ribilanciamento (sopra la banda)';
+      else if (r.inEsaurimento) t = 'In esaurimento: si tiene, non si compra';
+      else if (r.AP > 0) t = r.AH > 0 ? 'COMPRA: sottopeso + ribasso ' + nomeFascia : (B59 === 'RIBILANCIAMENTO' ? 'COMPRA: ribilanciamento' : 'COMPRA: sottopeso');
+      else if (r.O !== 'OK' && r.O !== 'STORICO BREVE') t = 'Non si compra: ' + r.O.toLowerCase();
+      else if (r.X >= B13) t = r.AH > 0 ? 'Sottopeso + ribasso ' + nomeFascia + ': capitale del mese esaurito' : 'Sottopeso: in attesa';
+      else if (r.H <= -B13) t = 'Sovrappeso: non si compra';
+      else t = r.H > 0 ? 'In linea (sottopeso sotto l’ordine minimo)' : 'In linea';
+      r.segnale = t;
+      // prossima soglia
+      r.prossima = null;
+      if (r.livelli && !r.inEsaurimento) {
+        var prox = r.AH === 0 ? r.livelli[0] : (r.AH === 1 ? r.livelli[1] : (r.AH === 2 ? r.livelli[2] : null));
+        if (prox != null) r.prossima = { prezzo: prox, variazione: prox / r.prezzo - 1 };
+      }
+    });
+    spec.forEach(function (s) {
+      var t;
+      if (s.F <= 0) t = 'Non in portafoglio';
+      else if (!B38) t = 'BLOCCATO';
+      else if (s.AR > 0) t = 'VENDI: proficuo (+' + eur0(s.BE) + ' € netti stimati)';
+      else if (s.BF != null) t = 'TIENI: sotto il pareggio (' + fx(s.BF, 2) + ' € per quota)';
+      else t = 'TIENI';
+      s.segnale = t;
+    });
+    // testo delle azioni
+    az.forEach(function (r) {
+      var t;
+      if (!B38) t = 'BLOCCATO';
+      else if (r.K === 0 && r.AB === 0) t = 'USCITA: verdetto Graham «' + r.verdetto + '»';
+      else if (r.K === 0) t = (r.AX < 1 ? 'USCITA: punteggio sceso da ' + fx(r.def.punteggioRiferimento, 0) + ' a ' + fx(r.punteggio, 0) + ', allocazione sotto il minimo' : 'USCITA: allocazione sotto il minimo') + ' (minimo ' + eur0(B31) + ' €)';
+      else if (r.AI > 0) t = 'RIDUCI: azioni sopra il tetto del ' + pct0(B17);
+      else if (r.AE > 0) t = r.AX < 1 ? 'RIDUCI: punteggio sceso da ' + fx(r.def.punteggioRiferimento, 0) + ' a ' + fx(r.punteggio, 0) : (r.AB < 1 ? 'RIDUCI: verdetto Graham «' + r.verdetto + '»' : 'RIDUCI: sopra il massimo per azienda (' + eur0(B29) + ' €)');
+      else if (r.AN > 0) t = r.AX > 1 ? 'AUMENTA: punteggio salito da ' + fx(r.def.punteggioRiferimento, 0) + ' a ' + fx(r.punteggio, 0) + ', margine ' + fx(r.AT * 100, 0) + '%' : 'RINFORZA: margine di sicurezza ' + fx(r.AT * 100, 0) + '%';
+      else if (r.AL > 0) t = 'Acquisto possibile, ma manca spazio o capitale';
+      else if (r.stato !== 'OK') t = 'MANTIENI (dati Graham ' + r.stato.toLowerCase() + ')';
+      else t = 'MANTIENI' + (r.AW != null ? ' (punteggio ' + fx(r.punteggio, 0) + ', riferimento ' + fx(r.def.punteggioRiferimento, 0) + ')' : '');
+      r.segnale = t;
+      // quando rinforzare
+      var cambioR = isNum(r.def.cambioLocale) && r.def.cambioLocale > 0 ? r.def.cambioLocale : null;
+      var prezzoRinforzo = (cambioR && isNum(r.def.valoreLocale) && r.AC === 'SI') ? r.def.valoreLocale * (1 - B32) / cambioR : null;
+      r.prezzoRinforzo = prezzoRinforzo;
+      var quando;
+      if (r.K === 0 || r.AJ > 0) quando = 'in uscita: non si rinforza';
+      else if (r.AC !== 'SI') quando = 'verdetto o dati: niente rinforzi';
+      else if (r.valore >= r.K - B13 + 1e-9) quando = r.valore > r.K ? 'sopra l’allocazione obiettivo: niente rinforzi' : 'già all’allocazione obiettivo';
+      else quando = prezzoRinforzo != null ? 'se il prezzo scende sotto ' + fx(prezzoRinforzo, 2) + ' €' : '';
+      r.quando = quando;
+    });
+
+    // --- riepilogo e operazioni
+    var B61 = ETF.reduce(function (s, r) { return s + r.AL; }, 0);
+    var B62 = ETF.reduce(function (s, r) { return s + r.AP; }, 0);
+    var B63 = Math.min(B60, B61) + B54, B64 = B62 + B54, B65 = Math.max(0, B9 - B64);
+    var B66 = B42 + B43 + B45 + B47 + B51;
+
+    var ops = [];
+    rowsAll.forEach(function (r) {
+      if (r.importo !== 0 && !(r.spec && r.AX === 0 && !(r.AP > 0))) {
+        ops.push({
+          tipo: r.spec ? 'Speculativo' : 'ETF', nome: r.nome, isin: r.isin, verso: r.importo > 0 ? 'COMPRA' : 'VENDI',
+          importo: Math.abs(r.importo), prezzo: r.spec ? r.ref.prezzo : r.prezzo,
+          motivo: r.segnale || (r.ref && r.ref.segnale) || '', costi: r.costi, imposta: r.imposta, minus: r.minus, ordine: r.riga
+        });
+      }
+    });
+    // le speculative hanno il testo dentro spec[]
+    ops.forEach(function (o) { if (o.tipo === 'Speculativo') { var s = spec.filter(function (x) { return x.isin === o.isin; })[0]; if (s) o.motivo = s.segnale; } });
+    az.forEach(function (r) {
+      if (r.N !== 0) {
+        ops.push({ tipo: 'Azione', nome: r.nome, isin: r.isin, verso: r.N > 0 ? 'COMPRA' : 'VENDI', importo: Math.abs(r.N),
+          prezzo: r.prezzo, motivo: r.segnale, costi: r.costi, imposta: r.imposta, minus: r.minus, ordine: 100 + r.rigaExcel });
+      }
+    });
+    ops.sort(function (a, b) {
+      var sa = a.verso === 'VENDI' ? 0 : 1, sb = b.verso === 'VENDI' ? 0 : 1;
+      return sa !== sb ? sa - sb : a.ordine - b.ordine;
+    });
+    ops.forEach(function (o, i) {
+      o.n = i + 1;
+      o.quantita = isNum(o.prezzo) && o.prezzo > 0 ? o.importo / o.prezzo : null;
+    });
+
+    var sintesi;
+    if (!B38) sintesi = 'BLOCCATO: ' + motivoBlocco;
+    else if (ops.length > 0) sintesi = 'Operazioni suggerite: ' + ops.length + '. Prima le vendite, poi gli acquisti.';
+    else if (B9 > 0) {
+      var nElig = ETF.filter(function (r) { return r.AG === 1; }).length;
+      var nFasce = ETF.filter(function (r) { return r.AH > 0; }).length;
+      if (nElig === 0) sintesi = 'ATTENDI: nessun ETF sotto il suo obiettivo di almeno un ordine minimo. Il capitale resta disponibile.';
+      else if (nFasce === 0) sintesi = 'ATTENDI: la quota base del mese (' + eur0(B58) + ' €) non arriva all’ordine minimo e non ci sono ribassi: il capitale si accumula per i mesi dopo.';
+      else sintesi = 'ATTENDI: gli importi del mese restano sotto l’ordine minimo. Il capitale resta disponibile.';
+    } else if (B9 < 0) sintesi = 'Buffer negativo, ma niente da vendere rispettando le regole: vedi «Non riducibile».';
+    else sintesi = 'Buffer nullo: nessuna operazione necessaria.';
+
+    res.quadro = {
+      buffer: B6, bufferResiduo: B9, capitaleAutorizzato: B10, valoreAzionario: B5, patrimonio: B11,
+      candidato: B63, acquisti: B64, inAttesa: B65, riduzioneRichiesta: B41, vendite: B66, nonRiducibile: B48,
+      costi: ops.reduce(function (s, o) { return s + o.costi; }, 0),
+      imposte: ops.reduce(function (s, o) { return s + o.imposta; }, 0),
+      minus: ops.reduce(function (s, o) { return s + o.minus; }, 0),
+      etfCore: B18, spec: B19, azioni: B20, altriNonClassificati: B21,
+      obiettivoEtf: B24v, tettoAzioni: B23, azioniDopoVendite: B52, spazioAzioni: B53,
+      pesoMax: B29, pesoMedio: B30, pesoMin: B31, ordineMinimo: B13,
+      acquistiMese: B55, quotaBase: B58, modo: B59, capitaleEtf: B60, valido: B38 === 1, motivoBlocco: motivoBlocco, sintesi: sintesi,
+      etaDati: etaSnap
+    };
+    res.etf = ETF; res.speculativi = spec; res.azioni = az; res.operazioni = ops;
+    if (B21 > 0) res.avvisi.push('Ci sono ' + eur0(B21) + ' € di ETF azionari fuori dal paniere, che l’app non gestisce.');
+    return res;
+  }
+
+  /* ------------------------------------------------------------ operazioni registrate */
+  /* Registra un'operazione eseguita: aggiorna quantita', costo, prezzo e liquidita'. Restituisce nuove posizioni. */
+  function applicaOperazione(posizioni, op) {
+    var nuove = posizioni.map(function (p) { return Object.assign({}, p); });
+    var p = nuove.filter(function (x) { return x.isin === op.isin && x.classe === 'Azionario' && !x.archiviata; })[0];
+    var liq = nuove.filter(function (x) { return x.tipo === 'Liquidità'; })[0];
+    if (!p) throw new Error('Posizione non trovata');
+    var q = op.importo / op.prezzo;
+    var comm = num(op.commissione, 0);
+    if (op.verso === 'COMPRA') {
+      p.qta = num(p.qta, 0) + q; p.costo = num(p.costo, 0) + op.importo;
+      if (liq) liq.qta -= (op.importo + comm);
+    } else {
+      var q0 = num(p.qta, 0);
+      var qv = Math.min(q, q0);
+      var quota = q0 > 0 ? qv / q0 : 1;
+      p.costo = num(p.costo, 0) * (1 - quota); p.qta = q0 - qv;
+      if (liq) liq.qta += (op.importo - comm);
+      if (p.qta < 1e-6) { p.qta = 0; p.costo = 0; if (p.tipo === 'Azione') p.archiviata = true; }
+    }
+    p.prezzo = op.prezzo;
+    return nuove;
+  }
+
+  var API = {
+    CLASSI: CLASSI, valorePosizione: valorePosizione, dalleCurva: dalleCurva, calcolaPortafoglio: calcolaPortafoglio,
+    calcolaBilanciamento: calcolaBilanciamento, percentileRibasso: percentileRibasso, applicaOperazione: applicaOperazione,
+    giorniTra: giorniTra, meseChiave: meseChiave, isNum: isNum, eur0: eur0, fx: fx
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API;
+  else root.Motore = API;
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var Mo = window.Motore;
+  var KEY = 'pendolo-v2', KEYGH = 'pendolo-gh', KEYC = 'pendolo-cache-v2';
+  var S = { cfg: null, dati: null, U: null, snap: null, tab: 'oggi', prova: null, shock: 0, modPrezzi: false, agg: null, memoria: true, ultimaLettura: 0 };
+
+  /* ---------------------------------------------------------------- utilita' */
+  function $(s, r) { return (r || document).querySelector(s); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var nf0 = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 });
+  var nf2 = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function eur(x, d) { if (x == null || !isFinite(x)) return '–'; return (x < 0 ? '−' : '') + (d ? nf2 : nf0).format(Math.abs(x)) + ' €'; }
+  function sgn(x, d) { return (x > 0 ? '+' : (x < 0 ? '−' : '')) + (d ? nf2 : nf0).format(Math.abs(x)) + ' €'; }
+  function pc(x, d) { if (x == null || !isFinite(x)) return '–'; return (x * 100).toFixed(d == null ? 1 : d).replace('.', ',') + '%'; }
+  function spc(x, d) { if (x == null || !isFinite(x)) return '–'; return (x > 0 ? '+' : (x < 0 ? '−' : '')) + Math.abs(x * 100).toFixed(d == null ? 1 : d).replace('.', ',') + '%'; }
+  function dec(x, d) { if (x == null || !isFinite(x)) return '–'; return Number(x).toLocaleString('it-IT', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  function qta(q) { return Number(q).toLocaleString('it-IT', { maximumFractionDigits: 4 }); }
+  function parseNum(s) { if (s == null) return null; var t = String(s).trim().replace(/\s/g, '').replace(/€/g, ''); if (t === '') return null; if (t.indexOf(',') >= 0) t = t.replace(/\./g, '').replace(',', '.'); var v = Number(t); return isFinite(v) ? v : null; }
+  function dataIt(iso) { if (!iso) return '–'; var d = new Date(iso.length <= 10 ? iso + 'T00:00:00' : iso); return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
+  function dataOra(iso) { var d = new Date(iso); return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }); }
+  function fa(iso) { var g = Mo.giorniTra(iso, new Date()); if (g == null) return ''; return g <= 0 ? 'oggi' : (g === 1 ? 'ieri' : g + ' giorni fa'); }
+  function toast(t) { var el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 2600); }
+  function tone(txt) { if (/^COMPRA|^RINFORZA|^AUMENTA/.test(txt)) return 'buy'; if (/^VENDI|^RIDUCI|^USCITA/.test(txt)) return 'sell'; return ''; }
+
+  /* ---------------------------------------------------------------- stato e salvataggio
+     Tutto cio' che e' tuo (quantita', costi, operazioni) sta SOLO in questo telefono (localStorage).
+     I dati di mercato arrivano dal file dati/dati.json, scritto da scripts/aggiorna_dati.py su GitHub. */
+  function leggiLS(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function scriviLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function clona(x) { return JSON.parse(JSON.stringify(x)); }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function giornoLocale(iso) { var d = new Date(iso); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
+  function isNum(x) { return typeof x === 'number' && isFinite(x); }
+
+  function caricaLocale() {
+    S.U = leggiLS(KEY);
+    if (S.U && S.U.v !== 2) S.U = null;
+    var c = leggiLS(KEYC) || {};
+    S.cfg = c.cfg || null; S.dati = c.dati || null;
+  }
+  function salvaU() { S.memoria = scriviLS(KEY, S.U); }
+  function salvaCache() { scriviLS(KEYC, { cfg: S.cfg, dati: S.dati }); }
+
+  /* ---- dati di mercato */
+  function leggiJson(url) {
+    return fetch(url, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  async function caricaDati() {
+    var esito = { cfg: false, dati: false };
+    try { S.cfg = await leggiJson('config.json?t=' + Date.now()); esito.cfg = true; } catch (e) { }
+    try { S.dati = await leggiJson('dati/dati.json?t=' + Date.now()); esito.dati = true; } catch (e) { }
+    if (esito.cfg || esito.dati) salvaCache();
+    S.ultimaLettura = Date.now();
+    return esito;
+  }
+
+  /* ---- posizioni: le tue, con il prezzo di mercato piu' recente dei dati (salvo prezzo manuale o inserito da te oggi) */
+  function posizioniReali() {
+    if (!S.U) return [];
+    var px = (S.dati && S.dati.prezzi) || {};
+    return S.U.posizioni.map(function (p) {
+      var o = Object.assign({}, p), d = p.isin ? px[p.isin] : null;
+      if (d && !p.prezzoManuale && p.tipo !== 'Obbligazione' && p.tipo !== 'Liquidità' && isNum(d.prezzo) && d.prezzo > 0 && (!p.prezzoTs || d.data >= giornoLocale(p.prezzoTs))) {
+        o.prezzo = d.prezzo; o.daMercato = d.data;
+      }
+      o.aggiornatoIl = (!o.daMercato && p.prezzoTs) ? p.prezzoTs : null;
+      return o;
+    });
+  }
+  function posseduta(isin) {
+    return !!(S.U && S.U.posizioni.some(function (p) { return p.isin === isin && p.tipo === 'Azione' && !p.archiviata && p.qta > 0; }));
+  }
+  function manualeValido() { var o = S.U && S.U.pendoloManuale; return !!(o && S.snap && o.meseBase === (S.snap.portafoglio.pendolo || {}).mese); }
+  function pendoloEffettivo() {
+    var base = S.snap.portafoglio.pendolo || {};
+    return manualeValido() ? Object.assign({}, base, S.U.pendoloManuale) : base;
+  }
+  function conRibasso(pos) {
+    if (!S.shock) return pos;
+    return pos.map(function (p) { return (p.classe === 'Azionario' && (p.tipo === 'ETF' || p.tipo === 'Azione')) ? Object.assign({}, p, { prezzo: p.prezzo * (1 + S.shock) }) : p; });
+  }
+
+  /* ---- composizione: config + dati + il tuo portafoglio -> la struttura che il motore conosce */
+  function minIl() {
+    var f = (S.dati && S.dati.fonti) || {}, m = null;
+    ['pendolo', 'mercato', 'etf'].forEach(function (k) {
+      var t = f[k] && f[k].il ? Date.parse(f[k].il) : 0;
+      if (!t) t = 0;
+      if (m === null || t < m) m = t;
+    });
+    return m ? new Date(m).toISOString() : null;
+  }
+  function componi() {
+    var cfg = S.cfg, d = S.dati;
+    if (!cfg || !d) { S.snap = null; return; }
+    var U = S.U, oggi = new Date(), mese = Mo.meseChiave(oggi), par = cfg.bilanciamento.parametri;
+    var cont = U && U.contatori && U.contatori.mese === mese ? U.contatori : null;
+    var vecchio = par.giorniPrezziVecchi || 7;
+    function conStato(s) {
+      var o = Object.assign({}, s), g = s.ultimaData ? Mo.giorniTra(s.ultimaData, oggi) : null;
+      if ((o.stato === 'OK' || o.stato === 'STORICO BREVE') && g != null && g > vecchio) { o.stato = 'NON AGGIORNATO'; o.messaggio = 'ultimo prezzo del ' + dataIt(s.ultimaData); }
+      return o;
+    }
+    function etfDa(e) { return Object.assign({}, e, { storico: d.etf && d.etf[e.isin] ? conStato(d.etf[e.isin]) : null }); }
+    var azStato = (U && U.azioniStato) || {}, cambiato = false;
+    var azioni = cfg.bilanciamento.azioni.map(function (a) {
+      var g = (d.graham && d.graham[a.isin]) || {}, us = azStato[a.isin] || {};
+      if (U && posseduta(a.isin)) {
+        if (us.riferimento == null) {   // nuova azione: l'allocazione di riferimento e' il costo di acquisto, e non si tocca piu'
+          var pz = U.posizioni.filter(function (p) { return p.isin === a.isin && p.tipo === 'Azione'; })[0];
+          if (pz && pz.costo) { us = Object.assign({}, us, { riferimento: Math.round(pz.costo * 100) / 100, registrata: oggi.toISOString().slice(0, 10) }); azStato[a.isin] = us; cambiato = true; }
+        }
+        if (us.punteggioRiferimento == null && isNum(g.punteggio) && g.verdetto && g.verdetto !== 'Dati insufficienti' && g.verdetto !== 'In attesa dati') {
+          us = Object.assign({}, us, { punteggioRiferimento: Math.round(g.punteggio * 10) / 10 }); azStato[a.isin] = us; cambiato = true;
+        }
+      }
+      return {
+        isin: a.isin, nome: a.nome, riferimento: us.riferimento != null ? us.riferimento : null, registrata: us.registrata || null,
+        punteggioRiferimento: us.punteggioRiferimento != null ? us.punteggioRiferimento : null,
+        punteggio: g.punteggio, verdetto: g.verdetto, copertura: g.copertura, valoreLocale: g.valoreLocale, prezzoLocale: g.prezzoLocale,
+        cambioLocale: g.cambioLocale, valuta: g.valuta, allerte: g.allerte, aggiornato: g.aggiornato, esito: g.esito,
+        valoreStimatoEur: (isNum(g.valoreLocale) && isNum(g.cambioLocale) && g.cambioLocale > 0) ? g.valoreLocale / g.cambioLocale : null
+      };
+    });
+    if (cambiato && U) { U.azioniStato = azStato; salvaU(); }
+    var pe = d.pendolo || {}, me = d.mercato || null;
+    S.snap = {
+      versione: 2, generato: minIl(), ultimoAgg: d.generato,
+      fonti: { meseDati: cont ? mese : null, dettaglio: d.fonti || {} },
+      avvisi: d.avvisi || [],
+      portafoglio: {
+        strategia: cfg.strategia,
+        pendolo: {
+          punteggio: pe.punteggio, mese: pe.mese, riferimento: pe.riferimento, riferimentoMese: pe.riferimentoMese, crescita: pe.crescita,
+          credito: pe.credito, coperturaCredito: pe.coperturaCredito, aggiornato: pe.aggiornato, ottimismo: pe.ottimismo, cape: pe.cape, ecy: pe.ecy, storia: pe.storia
+        },
+        mercato: me ? { sottoMedia: me.sottoMedia, scostamento: me.scostamento, mese: me.mese, mediaMobileMesi: me.mediaMobileMesi } : null
+      },
+      bilanciamento: {
+        parametri: par, etf: cfg.bilanciamento.etf.map(etfDa), speculativi: cfg.bilanciamento.speculativi.map(etfDa), azioni: azioni,
+        prezziDel: d.fonti && d.fonti.etf && d.fonti.etf.il ? d.fonti.etf.il : null,
+        compratoMese: cont ? cont.comprato || {} : {}, vendutoMese: cont ? cont.venduto || {} : {}
+      }
+    };
+  }
+  function ricalcola() {
+    componi();
+    if (!S.snap || !S.U) { S.pf = null; S.bl = null; return; }
+    var st = { snap: S.snap, posizioni: conRibasso(posizioniReali()), pendolo: pendoloEffettivo(), mercato: S.snap.portafoglio.mercato, operazioni: S.U.ops, tOps: S.U.tOps, oggi: new Date() };
+    S.st = st;
+    S.pf = Mo.calcolaPortafoglio(st, S.prova != null ? { punteggio: S.prova } : {});
+    S.bl = S.pf.ok ? Mo.calcolaBilanciamento(st, S.pf) : null;
+  }
+  function inProva() { return S.prova != null || S.shock !== 0; }
+
+  function scriviOp(op) {
+    var i = S.U.ops.findIndex(function (o) { return o.id === op.id; });
+    if (i >= 0) S.U.ops[i] = op; else S.U.ops.push(op);
+    salvaU();
+  }
+
+  /* ---- backup e importazione (stesso formato: il file iniziale e' un backup senza operazioni) */
+  function esportaStato() {
+    var U = S.U; if (!U) return null;
+    return { tipo: 'pendolo-backup', v: 2, creato: new Date().toISOString(), posizioni: U.posizioni, azioniStato: U.azioniStato || {}, contatori: U.contatori || null,
+      tOps: U.tOps, ops: U.ops || [], pendoloManuale: U.pendoloManuale || null, base: U.base || null };
+  }
+  function validaBackup(j) {
+    if (!j || j.tipo !== 'pendolo-backup' || j.v !== 2 || !Array.isArray(j.posizioni)) return 'Non è un file di backup di questa app (versione 2).';
+    for (var i = 0; i < j.posizioni.length; i++) {
+      var p = j.posizioni[i];
+      if (!p || !p.id || !p.tipo || !p.classe || !isFinite(p.qta) || !isFinite(p.prezzo)) return 'La posizione ' + (i + 1) + ' non è completa.';
+    }
+    return null;
+  }
+  function daBackup(j) {
+    var base = j.base || { posizioni: clona(j.posizioni), azioniStato: clona(j.azioniStato || {}), contatori: j.contatori ? clona(j.contatori) : null };
+    return { v: 2, posizioni: clona(j.posizioni), azioniStato: clona(j.azioniStato || {}), contatori: j.contatori || null,
+      tOps: isFinite(j.tOps) ? j.tOps : Date.now(), ops: clona(j.ops || []), pendoloManuale: j.pendoloManuale || null, base: base };
+  }
+
+  /* ---- collegamento a GitHub (solo per l'aggiornamento "vero" con il pulsante) */
+  function leggiGh() { return leggiLS(KEYGH) || {}; }
+  function repoDefault() {
+    var h = location.hostname, p = location.pathname.split('/').filter(Boolean);
+    return (/\.github\.io$/.test(h) && p.length) ? h.split('.')[0] + '/' + p[0].replace(/\.html?$/, '') : '';
+  }
+  function ghFetch(gh, path, opt) {
+    opt = opt || {};
+    opt.headers = Object.assign({ 'Accept': 'application/vnd.github+json', 'Authorization': 'Bearer ' + gh.token, 'X-GitHub-Api-Version': '2022-11-28' }, opt.headers || {});
+    opt.cache = 'no-store';
+    return fetch('https://api.github.com' + path, opt);
+  }
+  function spiegaGh(r) {
+    if (r.status === 401) return 'Il token non è valido o è scaduto.';
+    if (r.status === 403) return 'Il token non ha il permesso «Actions: lettura e scrittura» su questo repository (o GitHub ha limitato le richieste).';
+    if (r.status === 404) return 'Repository o file aggiorna.yml non trovato: controlla il nome (utente/repository) e che il token abbia accesso a quel repository.';
+    if (r.status === 422) return 'GitHub rifiuta la richiesta (422): il ramo del repository non è «main»? Indicalo nelle impostazioni.';
+    return 'GitHub ha risposto ' + r.status + '.';
+  }
+  function pausa(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function statoAgg(msg) { S.agg = Object.assign({}, S.agg || {}, { attivo: true, msg: msg }); aggiornaBarra(); }
+
+  async function aggiornaConWorkflow(gh, repo, sezioni) {
+    var ramo = gh.ramo || 'main', wf = '/repos/' + repo + '/actions/workflows/aggiorna.yml';
+    statoAgg('Controllo GitHub…');
+    var rp = await ghFetch(gh, wf + '/runs?per_page=10');
+    if (!rp.ok) throw new Error(spiegaGh(rp));
+    var visti = {}; ((await rp.json()).workflow_runs || []).forEach(function (x) { visti[x.id] = true; });
+    statoAgg('Avvio l’aggiornamento su GitHub…');
+    var body = { ref: ramo }; if (sezioni) body.inputs = { sezioni: sezioni };
+    var r = await ghFetch(gh, wf + '/dispatches', { method: 'POST', body: JSON.stringify(body) });
+    if (r.status !== 204) throw new Error(spiegaGh(r));
+    var t0 = Date.now(), run = null;
+    while (Date.now() - t0 < 16 * 60 * 1000) {
+      await pausa(7000);
+      var rr; try { rr = await ghFetch(gh, wf + '/runs?per_page=10'); } catch (e) { continue; }
+      if (!rr.ok) continue;
+      run = ((await rr.json()).workflow_runs || []).filter(function (x) { return !visti[x.id]; })[0] || null;
+      var s = Math.round((Date.now() - t0) / 1000);
+      if (!run) statoAgg('In attesa che GitHub parta… ' + s + ' s');
+      else if (run.status !== 'completed') statoAgg('GitHub sta scaricando i dati… ' + s + ' s');
+      else break;
+    }
+    if (!run || run.status !== 'completed') throw new Error('GitHub ci mette più del solito. Riprova fra qualche minuto con «Leggi i dati pubblicati».');
+    if (run.conclusion !== 'success') throw new Error('L’aggiornamento su GitHub non è riuscito (' + run.conclusion + '). Dettagli nella scheda Actions del repository.');
+    statoAgg('Leggo i dati nuovi…');
+    var c = await ghFetch(gh, '/repos/' + repo + '/contents/dati/dati.json?ref=' + encodeURIComponent(ramo) + '&t=' + Date.now(), { headers: { 'Accept': 'application/vnd.github.raw+json' } });
+    if (!c.ok) throw new Error(spiegaGh(c));
+    S.dati = await c.json(); salvaCache(); S.ultimaLettura = Date.now();
+    caricaDati().catch(function () { });   // config.json eventualmente cambiato: lo rileggo senza aspettare
+  }
+
+  async function aggiorna(sezioni, soloLettura) {
+    if (S.agg && S.agg.attivo) return;
+    var gh = leggiGh(), repo = gh.repo || repoDefault(), prima = S.dati && S.dati.generato;
+    S.agg = { attivo: true, msg: 'Scarico…' }; aggiornaBarra();
+    try {
+      if (gh.token && repo && !soloLettura) {
+        await aggiornaConWorkflow(gh, repo, sezioni);
+        S.agg = { attivo: false, ok: true, msg: 'Dati aggiornati.' };
+      } else {
+        var e = await caricaDati();
+        if (!e.dati) throw new Error('Non riesco a leggere i dati. Sei offline?');
+        var nuovo = S.dati.generato !== prima;
+        S.agg = { attivo: false, ok: true, msg: nuovo ? 'Dati pubblicati letti.' : (gh.token && repo ? 'Nessun dato più recente pubblicato.' : 'Nessun dato più recente. Per scaricarli adesso collega GitHub (Dati › Collegamento).') };
+      }
+    } catch (er) {
+      S.agg = { attivo: false, ok: false, msg: String(er && er.message || er) };
+    }
+    toast(S.agg.msg); render();
+  }
+
+  /* ---------------------------------------------------------------- fogli */
+  function apriFoglio(html, dopo) {
+    $('#sheet-in').innerHTML = html;
+    $('#veil').classList.add('on'); $('#sheet').classList.add('on'); $('#sheet').setAttribute('aria-hidden', 'false');
+    $('#sheet').scrollTop = 0;
+    if (dopo) dopo();
+  }
+  function chiudiFoglio() { $('#veil').classList.remove('on'); $('#sheet').classList.remove('on'); $('#sheet').setAttribute('aria-hidden', 'true'); }
+
+  /* ---------------------------------------------------------------- disegni */
+  function gauge(score, rif, low, high) {
+    var X = function (v) { return 14 + v * 2.92; };
+    var h = '<svg viewBox="0 0 320 78" role="img" aria-label="Pendolo: punteggio ' + dec(score, 1) + ' su 100">';
+    h += '<defs><linearGradient id="gr" x1="0" x2="1"><stop offset="0" style="stop-color:var(--fear)"/><stop offset=".5" style="stop-color:var(--line)"/><stop offset="1" style="stop-color:var(--greed)"/></linearGradient></defs>';
+    h += '<rect x="14" y="38" width="292" height="10" rx="5" fill="url(#gr)"/>';
+    h += '<rect x="' + X(low) + '" y="35" width="' + (X(high) - X(low)) + '" height="16" rx="4" fill="none" style="stroke:var(--ink3)" stroke-width="1.2" stroke-dasharray="3 3"/>';
+    [0, 20, 40, 60, 80, 100].forEach(function (t) { h += '<text x="' + X(t) + '" y="70" font-size="10" text-anchor="middle">' + t + '</text>'; });
+    if (rif != null && Math.abs(rif - score) > 0.05) {
+      h += '<path d="M' + X(rif) + ' 54 l5 8 h-10 z" style="fill:var(--ink2)"/>';
+    }
+    var cx = X(score), lx = Math.min(300, Math.max(26, cx));
+    h += '<circle cx="' + cx + '" cy="43" r="9" style="fill:var(--accent);stroke:var(--surface)" stroke-width="2.5"/>';
+    h += '<text x="' + lx + '" y="22" font-size="15" font-weight="600" text-anchor="middle" style="fill:var(--ink)">' + dec(score, 1) + '</text>';
+    return h + '</svg>';
+  }
+  function barraPeso(r) {
+    var W = 300, X = function (v) { return 4 + Math.min(1, Math.max(0, v)) * W; };
+    var h = '<svg viewBox="0 0 308 26" role="img" aria-label="' + esc(r.classe) + ': peso ' + pc(r.peso) + ', obiettivo ' + pc(r.obiettivo) + '">';
+    h += '<rect x="4" y="9" width="' + W + '" height="8" rx="4" style="fill:var(--surface2);stroke:var(--line)"/>';
+    h += '<rect x="' + X(r.min) + '" y="9" width="' + Math.max(2, X(r.max) - X(r.min)) + '" height="8" rx="3" style="fill:var(--accent-soft)"/>';
+    h += '<rect x="' + (X(r.obiettivo) - 1) + '" y="5" width="2" height="16" style="fill:var(--accent)"/>';
+    var c = X(r.peso);
+    h += '<circle cx="' + c + '" cy="13" r="6" style="fill:var(--ink);stroke:var(--surface)" stroke-width="2"/>';
+    return h + '</svg>';
+  }
+  function misuraRibasso(r) {
+    var lv = r.s.soglieRibasso; if (!lv || lv.length !== 3 || r.dd == null) return '';
+    var D = Math.abs(lv[2]) * 1.18, X = function (d) { return 6 + Math.min(1, Math.abs(d) / D) * 296; };
+    var col = r.AH > 0 ? 'var(--buy)' : 'var(--ink3)';
+    var h = '<svg viewBox="0 0 308 44" role="img" aria-label="Ribasso dal massimo a 12 mesi ' + spc(r.dd) + '">';
+    h += '<rect x="6" y="16" width="296" height="8" rx="4" style="fill:var(--surface2);stroke:var(--line)"/>';
+    h += '<rect x="6" y="16" width="' + Math.max(2, X(r.dd) - 6) + '" height="8" rx="4" style="fill:' + col + '"/>';
+    ['M', 'F', 'E'].forEach(function (L, i) {
+      var x = X(lv[i]);
+      h += '<rect x="' + (x - 1) + '" y="11" width="2" height="18" style="fill:var(--ink2)"/><text x="' + x + '" y="9" font-size="10" text-anchor="middle" font-weight="600">' + L + '</text>';
+    });
+    h += '<text x="6" y="40" font-size="10">massimo 12 mesi</text><text x="302" y="40" font-size="10" text-anchor="end">ribasso ' + spc(r.dd) + '</text>';
+    return h + '</svg>';
+  }
+  function curvaSvg(curva, score, rif) {
+    var W = 300, H = 120, X = function (p) { return 24 + p / 100 * (W - 30); }, Y = function (v) { return 8 + (1 - v) * (H - 30); };
+    var h = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Quota di azionario in funzione del punteggio">';
+    [0, .25, .5, .75, 1].forEach(function (g) { h += '<line x1="24" x2="' + (W - 6) + '" y1="' + Y(g) + '" y2="' + Y(g) + '" style="stroke:var(--line)"/><text x="20" y="' + (Y(g) + 3) + '" font-size="9" text-anchor="end">' + Math.round(g * 100) + '</text>'; });
+    var pts = [{ p: 0, az: curva[0].az }].concat(curva.map(function (c) { return { p: c.p, az: c.az }; })).concat([{ p: 100, az: curva[curva.length - 1].az }]);
+    h += '<polyline fill="none" style="stroke:var(--accent)" stroke-width="2" points="' + pts.map(function (q) { return X(q.p) + ',' + Y(q.az); }).join(' ') + '"/>';
+    var d = Mo.dalleCurva(curva, rif);
+    h += '<circle cx="' + X(rif) + '" cy="' + Y(d.az) + '" r="5" style="fill:var(--ink);stroke:var(--surface)" stroke-width="2"/>';
+    [0, 20, 40, 60, 80, 100].forEach(function (t) { h += '<text x="' + X(t) + '" y="' + (H - 4) + '" font-size="9" text-anchor="middle">' + t + '</text>'; });
+    return h + '</svg>';
+  }
+
+  /* ---------------------------------------------------------------- viste */
+  var ICONE = {
+    oggi: '<svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.2"/></svg>',
+    pos: '<svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h9"/></svg>',
+    az: '<svg viewBox="0 0 24 24"><path d="M5 19V9M10 19V5M15 19v-7M20 19V8"/></svg>',
+    dati: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>'
+  };
+  function menu() {
+    var t = [['oggi', 'Oggi', ICONE.oggi], ['pos', 'Posizioni', ICONE.pos], ['az', 'Azionario', ICONE.az], ['dati', 'Dati', ICONE.dati]];
+    $('#tabs').innerHTML = t.map(function (x) { return '<button class="tab" data-act="tab" data-v="' + x[0] + '"' + (S.tab === x[0] ? ' aria-current="page"' : '') + '>' + x[2] + '<span>' + x[1] + '</span></button>'; }).join('');
+  }
+
+  /* ---------------------------------------------------------------- avvisi e primo avvio */
+  var SEZIONI = [['pendolo', 'Pendolo (FRED, Yahoo, multpl)', 40], ['mercato', 'Indice e freno (Yahoo)', 40], ['prezzi', 'Prezzi (Yahoo)', 5], ['etf', 'Storico ETF (Yahoo)', 8], ['graham', 'Graham azioni (Yahoo, FRED)', 20]];
+  function bannerTop() {
+    var h = '';
+    if (S.shock) h += '<div class="banner sim"><span>SIMULAZIONE: azionario ' + spc(S.shock, 0) + '. Niente viene salvato.</span><button class="sm" data-act="esciSim">Esci</button></div>';
+    if (S.prova != null) h += '<div class="banner sim"><span>PUNTEGGIO DI PROVA ' + dec(S.prova, 1) + '. Niente viene salvato.</span><button class="sm" data-act="esciSim">Esci</button></div>';
+    var eta = S.bl ? S.bl.quadro.etaDati : (S.snap && S.snap.generato ? Mo.giorniTra(S.snap.generato, new Date()) : null);
+    if (S.snap && (eta == null || eta > 35)) h += '<div class="banner alert"><span>I dati di mercato sono vecchi (' + (eta == null ? 'mai scaricati' : eta + ' giorni') + '): le regole sono bloccate. Premi Aggiorna.</span><button class="sm" data-act="aggiorna">Aggiorna</button></div>';
+    else if (eta != null && eta > 7) h += '<div class="banner warn"><span>Dati di mercato di ' + eta + ' giorni fa. Premi Aggiorna.</span></div>';
+    var f = (S.dati && S.dati.fonti) || {}, rotte = SEZIONI.filter(function (s) { return f[s[0]] && f[s[0]].ok === false; });
+    if (rotte.length && !(eta != null && eta > 35)) h += '<div class="banner warn"><span>Ultimo aggiornamento non riuscito per: ' + rotte.map(function (s) { return s[1].split(' (')[0].toLowerCase(); }).join(', ') + '. Restano i dati precedenti (vedi Dati).</span></div>';
+    if (S.U && S.memoria === false) h += '<div class="banner alert"><span>Questo browser non permette di salvare i dati: quello che registri si perde alla chiusura. Aggiungi l’app alla schermata Home e riprova.</span></div>';
+    return h;
+  }
+  function vuoto() {
+    if (!S.cfg || !S.dati) {
+      var h = '<div class="card"><h2>Dati di mercato</h2>';
+      if (S.agg && S.agg.attivo) return h + '<p class="muted" style="margin:0">Scarico i dati…</p></div>';
+      return h + '<p class="muted" style="margin:0 0 10px">Non riesco a leggere i dati di mercato (config.json e dati/dati.json). ' + (S.cfg || S.dati ? '' : 'Se è la prima volta, controlla che l’app sia aperta dall’indirizzo su GitHub Pages e che la GitHub Action abbia girato almeno una volta. ') + '</p><button class="pri" data-act="aggiorna" data-solo="1">Riprova</button></div>';
+    }
+    return '<div class="card"><h2>Primo avvio</h2><p class="muted" style="margin:0 0 10px">Mancano le tue posizioni. Importa il file <b>posizioni_iniziali.json</b> (quantità e costi restano solo su questo telefono). Dopo, l’app si aggiorna da sola con i prezzi e i dati di mercato.</p><button class="pri" data-act="sheetImport">Importa il portafoglio</button></div>';
+  }
+  function aggiornaBarra() {
+    var b = $('#btnAgg'); if (!b) return;
+    var on = !!(S.agg && S.agg.attivo);
+    b.classList.toggle('on', on); b.disabled = on;
+    var sub = $('#sub'); if (sub) sub.textContent = on ? (S.agg.msg || '') : sottotitolo();
+  }
+  function sottotitolo() {
+    if (!S.dati || !S.dati.generato) return 'nessun dato';
+    return 'dati del ' + dataOra(S.dati.generato);
+  }
+
+  /* ---- dati */
+  function tsv() {
+    var righe = S.U.ops.filter(function (o) { return !o.annullata; }).map(function (o) {
+      return [new Date(o.ts).toLocaleDateString('it-IT'), o.nome, o.isin, o.verso === 'COMPRA' ? 'Acquisto' : 'Vendita', dec(o.importo, 2), dec(o.prezzo, 4), dec(o.quantita, 6), dec(o.commissione || 0, 2)].join('\t');
+    });
+    return ['Data\tStrumento\tISIN\tOperazione\tImporto €\tPrezzo €\tQuantità\tCommissione €'].concat(righe).join('\n');
+  }
+  function etaTesto(iso) { if (!iso) return 'mai'; var g = Mo.giorniTra(iso, new Date()); return g <= 0 ? 'oggi ' + dataOra(iso).slice(6) : (g === 1 ? 'ieri' : g + ' giorni fa'); }
+  function vistaDati() {
+    var h = '', d = S.dati, f = (d && d.fonti) || {}, gh = leggiGh(), repo = gh.repo || repoDefault();
+    h += '<section class="card"><h2>Dati di mercato<span class="chip ' + (gh.token ? 'ok' : 'warn') + '">' + (gh.token ? 'GitHub collegato' : 'solo lettura') + '</span></h2>';
+    if (!d) h += '<p class="muted" style="margin:0 0 8px">Nessun dato scaricato.</p>';
+    else {
+      h += '<div class="stack">';
+      SEZIONI.forEach(function (s) {
+        var x = f[s[0]] || {}, g = x.il ? Mo.giorniTra(x.il, new Date()) : null;
+        var cls = x.ok === false ? 'sell' : (g == null || g > s[2] ? 'warn' : 'ok');
+        var txt = x.ok === false ? 'errore' : (g == null ? 'mai' : (g > s[2] ? 'vecchio' : 'ok'));
+        h += '<div class="row"><div style="min-width:0"><div style="font-weight:500">' + esc(s[1]) + '</div><div class="small faint">' + (x.il ? 'scaricato ' + etaTesto(x.il) : 'mai scaricato') + (x.ok === false && x.errore ? ' · ' + esc(x.errore) : '') + '</div></div><span class="chip ' + cls + '">' + txt + '</span></div>';
+      });
+      h += '</div>';
+      var pe = d.pendolo; if (pe) h += '<p class="note" style="margin:10px 0 0">Punteggio ' + dec(pe.punteggio, 1) + ' · dati del mese ' + (pe.mese ? pe.mese.slice(5, 7) + '/' + pe.mese.slice(0, 4) : '–') + (S.snap && S.snap.portafoglio.mercato && S.snap.portafoglio.mercato.mese ? ' · freno sul mese ' + S.snap.portafoglio.mercato.mese.slice(5, 7) + '/' + S.snap.portafoglio.mercato.mese.slice(0, 4) : '') + '.</p>';
+      if (d.avvisi && d.avvisi.length) h += '<div class="stack" style="margin-top:10px">' + d.avvisi.map(function (a) { return '<div class="banner warn"><span>' + esc(a) + '</span></div>'; }).join('') + '</div>';
+    }
+    var occ = S.agg && S.agg.attivo;
+    h += '<div class="btns"><button class="pri" data-act="aggiorna"' + (occ ? ' disabled' : '') + '>' + (gh.token ? 'Aggiorna tutto' : 'Leggi i dati pubblicati') + '</button>' + (gh.token ? '<button data-act="aggiorna" data-sez="prezzi,mercato"' + (occ ? ' disabled' : '') + '>Solo prezzi</button>' : '') + '</div>';
+    h += '<p class="note" style="margin:10px 0 0">' + (gh.token
+      ? 'Il pulsante avvia lo stesso aggiornamento degli script (FRED, Yahoo, multpl) su GitHub e aspetta il risultato: «Solo prezzi» ci mette circa un minuto, «tutto» qualche minuto.'
+      : 'Senza collegamento l’app legge i dati che GitHub ha già scaricato (di solito ogni sera nei giorni di borsa). Per far partire adesso lo scarico, collega GitHub.') + '</p>';
+    h += '<div class="btns"><button class="sm" data-act="sheetGh">Collegamento a GitHub' + (repo ? '' : ' (da impostare)') + '</button></div></section>';
+
+    if (!S.U) return h + vuotoCard();
+    var attive = S.U.ops.filter(function (o) { return !o.annullata; });
+    h += '<section class="card"><h2>Operazioni registrate<span class="chip ' + (attive.length ? 'info' : '') + '">' + attive.length + '</span></h2>';
+    if (!S.U.ops.length) h += '<p class="muted" style="margin:0">Quando tocchi «Registra» su un ordine, o fai un’operazione a mano, compare qui.</p>';
+    var ultimaAttiva = attive.slice(-1)[0];
+    S.U.ops.slice().reverse().slice(0, 40).forEach(function (o) {
+      h += '<div class="op" style="grid-template-columns:auto 1fr auto"><span class="chip ' + (o.annullata ? '' : (o.verso === 'COMPRA' ? 'buy' : 'sell')) + '">' + (o.annullata ? 'ANNULLATA' : o.verso) + '</span><div class="nm" style="' + (o.annullata ? 'text-decoration:line-through;color:var(--ink3)' : '') + '">' + esc(o.nome) + '</div><div class="amt">' + eur(o.importo, 2) + '<small>' + dataOra(new Date(o.ts).toISOString()) + '</small></div>' +
+        (o === ultimaAttiva ? '<div class="go" style="grid-column:2/4"><button class="sm danger" data-act="annullaOp" data-id="' + o.id + '">Annulla questa</button></div>' : '') + '</div>';
+    });
+    if (attive.length) h += '<div class="btns"><button data-act="copiaOps">Copia elenco</button></div>';
+    h += '</section>';
+    h += '<section class="card"><h2>Backup</h2><p class="muted small" style="margin:0 0 8px">Quantità, costi e operazioni stanno solo in questo telefono. Se cambi telefono o cancelli i dati del browser li perdi: fai ogni tanto un backup e conservalo dove vuoi.</p>' +
+      '<div class="btns"><button data-act="backupSalva">Salva backup</button><button data-act="backupCopia">Copia backup</button></div><div class="btns"><button data-act="sheetImport">Ripristina da file</button></div></section>';
+    h += '<section class="card"><h2>Come funziona</h2><div class="stack small muted"><div>Le regole sono quelle dei tuoi file: <b>pendolo</b> (curva, pavimento di liquidità, freno, tetto sulla cassa), <b>fasce di ribasso</b> degli ETF, <b>Graham</b> e limiti per azienda. Sono verificate contro i tuoi file Excel.</div>' +
+      '<div><b>Da internet</b> arrivano punteggio del pendolo, indice e freno, prezzi, storico degli ETF e valutazione Graham. <b>Dal telefono</b> inserisci solo quello che è tuo: operazioni, quantità, liquidità.</div>' +
+      '<div>Con un prezzo che inserisci tu, l’app ricalcola fascia di ribasso e margine di sicurezza. Il percentile esatto del ribasso lo calcola lo script: qui è interpolato fra le soglie.</div></div></section>';
+    h += '<section class="card"><h2>Ripristino</h2><p class="muted small" style="margin:0 0 8px">Torna a quantità, costi e punteggio dell’ultimo file importato. Le operazioni registrate restano nell’elenco, annullate.</p><button class="danger" data-act="reset">Annulla le modifiche fatte nell’app</button></section>';
+    return h;
+  }
+  function vuotoCard() { return '<section class="card"><h2>Il tuo portafoglio</h2><p class="muted" style="margin:0 0 10px">Importa <b>posizioni_iniziali.json</b> per vedere cosa fare.</p><button class="pri" data-act="sheetImport">Importa il portafoglio</button></section>'; }
+
+  function cardOperazioni() {
+    var bl = S.bl, q = bl.quadro, ops = bl.operazioni;
+    var h = '<section class="card"><h2>Cosa fare<span class="chip ' + (ops.length ? 'info' : 'ok') + '">' + (ops.length ? ops.length + (ops.length === 1 ? ' operazione' : ' operazioni') : 'niente da fare') + '</span></h2>';
+    h += '<p style="margin:0 0 4px">' + esc(q.sintesi) + '</p>';
+    if (ops.length) {
+      ops.forEach(function (o, i) {
+        h += '<div class="op"><span class="chip ' + (o.verso === 'COMPRA' ? 'buy' : 'sell') + '">' + o.verso + '</span><div class="nm">' + esc(o.nome) + '</div><div class="amt">' + eur(o.importo) + (o.quantita ? '<small>≈ ' + qta(o.quantita) + ' quote</small>' : '') + '</div>' +
+          '<div class="why">' + esc(o.motivo) + '</div><div class="go">' + (inProva() ? '' : '<button class="sm pri" data-act="regOp" data-i="' + i + '">Registra</button>') + '</div></div>';
+      });
+      h += '<p class="note" style="margin:8px 0 0">Prima le vendite, poi gli acquisti. Costi stimati ' + eur(q.costi, 2) + ', imposte ' + eur(q.imposte, 2) + (q.minus > 0 ? ', minusvalenze ' + eur(q.minus) : '') + '.</p>';
+    }
+    if (q.bufferResiduo > 0) h += '<p class="note" style="margin:6px 0 0">Capitale azionario ancora autorizzato: ' + eur(q.bufferResiduo) + ' (non è un ordine). Resta in attesa ' + eur(q.inAttesa) + '.</p>';
+    if (q.bufferResiduo < 0) h += '<p class="note" style="margin:6px 0 0">Riduzione richiesta dall’azionario: ' + eur(q.riduzioneRichiesta) + (q.nonRiducibile > 0 ? '; non riducibile con le regole: ' + eur(q.nonRiducibile) : '') + '.</p>';
+    var altre = S.pf.righe.filter(function (r) { return r.classe !== 'Azionario' && r.classe !== 'Liquidità' && r.scostamento !== 0 && Math.abs(r.daMuovere) >= S.snap.portafoglio.strategia.ordineMinimo; });
+    altre.forEach(function (r) { h += '<p class="note" style="margin:6px 0 0"><b>' + r.classe + '</b>: ' + r.azione + '. Scegli tu il titolo.</p>'; });
+    return h + '</section>';
+  }
+  function cardPendolo() {
+    var pf = S.pf, S0 = S.snap.portafoglio.strategia, pe = pendoloEffettivo();
+    var low = S0.zonaNeutra[0], high = S0.zonaNeutra[1];
+    var h = '<section class="card"><h2>Il pendolo<button class="link" data-act="sheetPunteggio">Cambia punteggio</button></h2>';
+    h += '<div class="row small faint" style="margin-bottom:-2px"><span>pessimismo: si compra</span><span>euforia: si alleggerisce</span></div>';
+    h += gauge(pf.punteggioOggi, pf.punteggioRif, low, high);
+    h += '<p class="muted small" style="margin:6px 0 0">Il punteggio di riferimento è <b>' + dec(pf.punteggioRif, 1) + '</b>: ' + esc(pf.riferimentoNota) + '. L’obiettivo cambia solo a ' + low + ' o meno, oppure a ' + high + ' o più.</p>';
+    var fr = pf.freno;
+    h += '<div class="chips"><span class="chip">Crescita ' + (pe.crescita != null ? dec(pe.crescita, 0) : '–') + '</span><span class="chip">Credito ' + (pe.credito != null ? dec(pe.credito, 0) : '–') + '</span>' +
+      '<span class="chip ' + (fr.attivo ? 'warn' : '') + '">Freno ' + (fr.attivo ? 'ATTIVO' : (fr.sottoMedia === false ? 'spento' : 'n.d.')) + '</span>' +
+      (pe.ottimismo != null ? '<span class="chip info" title="Solo informazione">Ottimismo nei prezzi ' + dec(pe.ottimismo, 0) + '/100</span>' : '') + '</div>';
+    h += '<p class="note" style="margin:0">Dati del pendolo: mese ' + (pe.mese ? pe.mese.slice(5, 7) + '/' + pe.mese.slice(0, 4) : '–') + ', aggiornati il ' + dataIt(pe.aggiornato) + (manualeValido() ? ' (punteggio cambiato a mano nell’app)' : '') + '.' +
+      (fr.sottoMedia === false && fr.scostamento != null ? ' Il prezzo di fine mese è ' + spc(fr.scostamento) + ' sopra la media mobile.' : '') + '</p>';
+    return h + '<div class="btns"><button data-act="sheetProva">Prova un altro punteggio</button></div></section>';
+  }
+  function cardAllocazione() {
+    var pf = S.pf;
+    var h = '<section class="card"><h2>Allocazione<span class="faint" style="text-transform:none;letter-spacing:0;font-weight:400">peso · obiettivo · fascia</span></h2>';
+    pf.righe.forEach(function (r) {
+      var t = r.scostamento === 0 ? 'ok' : (Math.abs(r.scostamento) >= S.snap.portafoglio.strategia.scostForte ? 'warn' : '');
+      var at = tone(r.azione);
+      h += '<div class="alloc"><div class="row"><b>' + r.classe + '</b><span class="chip ' + t + '">' + esc(r.segnale.trim()) + '</span></div>' + barraPeso(r) +
+        '<div class="nums"><span>Oggi <b>' + pc(r.peso) + '</b> · ' + eur(r.valore) + '</span><span>Obiettivo <b>' + pc(r.obiettivo) + '</b> <small>(fascia ' + pc(r.min, 0) + '–' + pc(r.max, 0) + ')</small></span></div>' +
+        '<div class="act ' + (at || 'flat') + '">' + esc(r.azione) + '</div></div>';
+    });
+    var p = S.snap.portafoglio.strategia;
+    h += '<p class="note" style="margin:0">Passi: curva → pavimento liquidità ' + pc(p.pavimentoLiquidita, 0) + ' → freno → tetto cassa ' + eur(p.tettoCassaEuro) + (S.pf.tettoCassaAttivo ? ' (attivo: la cassa oltre il tetto va in obbligazioni)' : '') + '.</p>';
+    return h + '</section>';
+  }
+  function cardPatrimonio() {
+    var pf = S.pf, gl = pf.totale - pf.costoTotale;
+    return '<section class="card"><h2>Patrimonio</h2><div class="grid2"><div class="kpi"><div class="l">Valore totale</div><div class="v">' + eur(pf.totale) + '</div></div>' +
+      '<div class="kpi"><div class="l">Costo totale</div><div class="v">' + eur(pf.costoTotale) + '</div></div>' +
+      '<div class="kpi"><div class="l">Guadagno/perdita</div><div class="v ' + (gl >= 0 ? 'gl-p' : 'gl-n') + '">' + sgn(gl) + '</div></div>' +
+      '<div class="kpi"><div class="l">Sul costo</div><div class="v ' + (gl >= 0 ? 'gl-p' : 'gl-n') + '">' + (pf.costoTotale ? spc(gl / pf.costoTotale, 2) : '–') + '</div></div></div></section>';
+  }
+  function vistaOggi() {
+    if (!S.snap) return vuoto();
+    if (!S.pf.ok) return '<div class="card"><h2>Mancano dati</h2><p class="muted">Non c’è un punteggio del pendolo o il patrimonio è zero. Premi Aggiorna per scaricare i dati, oppure imposta il punteggio a mano.</p><button class="pri" data-act="sheetPunteggio">Imposta il punteggio</button></div>';
+    return bannerTop() + cardOperazioni() + cardPendolo() + cardAllocazione() + cardPatrimonio();
+  }
+
+  /* ---- posizioni */
+  var SEZ = [['ETF', 'ETF'], ['Azioni', 'Azioni'], ['Obbligazioni', 'Obbligazioni'], ['Oro e Liquidità', 'Oro e liquidità']];
+  function vistaPosizioni() {
+    if (!S.snap) return vuoto();
+    var pos = conRibasso(posizioniReali()).filter(function (p) { return !p.archiviata; });
+    var tot = S.pf.totale || 1;
+    var h = bannerTop();
+    h += '<div class="row"><span class="muted small">' + pos.length + ' posizioni · prezzi da Yahoo, modificabili</span>' +
+      (S.modPrezzi ? '<span style="display:flex;gap:8px"><button class="sm ghost" data-act="annullaPrezzi">Annulla</button><button class="sm pri" data-act="salvaPrezzi">Salva prezzi</button></span>' : (inProva() ? '' : '<button class="sm" data-act="modPrezzi">Modifica prezzi</button>')) + '</div>';
+    SEZ.forEach(function (s) {
+      var lista = pos.filter(function (p) { return p.sezione === s[0]; });
+      if (!lista.length) return;
+      var tv = lista.reduce(function (a, p) { return a + Mo.valorePosizione(p); }, 0);
+      h += '<section class="card"><h2>' + s[1] + '<span class="faint num" style="text-transform:none;letter-spacing:0;font-weight:500">' + eur(tv) + ' · ' + pc(tv / tot, 0) + '</span></h2>';
+      lista.forEach(function (p) {
+        var v = Mo.valorePosizione(p), gl = p.costo ? v / p.costo - 1 : null;
+        var editabile = p.tipo !== 'Obbligazione';
+        if (S.modPrezzi && editabile) {
+          var isLiq = p.tipo === 'Liquidità';
+          h += '<div class="pxrow"><div><div class="n" style="font-weight:500">' + esc(p.nome) + '</div><div class="small faint">' + (isLiq ? 'importo in euro' : 'prezzo in euro · ' + qta(p.qta) + ' quote') + '</div></div>' +
+            '<input class="px" inputmode="decimal" autocomplete="off" data-px="' + p.id + '" aria-label="' + (isLiq ? 'Importo' : 'Prezzo') + ' ' + esc(p.nome) + '" value="' + esc(isLiq ? dec(p.qta, 2) : dec(p.prezzo, p.prezzo < 10 ? 4 : 2)) + '"></div>';
+        } else {
+          var eta = p.aggiornatoIl ? '<span class="chip info" style="margin-left:4px">tuo, ' + fa(p.aggiornatoIl) + '</span>' : '';
+          h += '<button class="pos" data-act="sheetPos" data-id="' + p.id + '"><span class="n">' + esc(p.nome) + eta + '</span><span class="v">' + eur(v) + '</span>' +
+            '<span class="s">' + (p.tipo === 'Liquidità' ? 'liquidità' : (p.tipo === 'Obbligazione' ? 'nominale ' + eur(p.qta) + ' · prezzo ' + dec(p.prezzo, 2) : qta(p.qta) + ' × ' + dec(p.prezzo, p.prezzo < 10 ? 4 : 2) + ' €')) + '</span>' +
+            '<span class="s r">' + (gl != null && p.tipo !== 'Liquidità' && p.tipo !== 'Obbligazione' ? '<span class="' + (gl >= 0 ? 'gl-p' : 'gl-n') + '">' + spc(gl) + '</span> · ' : '') + pc(v / tot) + '</span></button>';
+        }
+      });
+      h += '</section>';
+    });
+    return h;
+  }
+
+  /* ---- azionario */
+  function chipSeg(t) {
+    var k = tone(t) || (/ribasso/.test(t) ? 'info' : '');
+    var l = t;
+    if (t.indexOf(':') > 0 && tone(t)) l = t.split(':')[0];
+    else if (/^Sottopeso \+ ribasso/.test(t)) l = 'RIBASSO';
+    else if (/^Sottopeso|^In linea/.test(t)) l = /^In linea/.test(t) ? 'IN LINEA' : 'IN ATTESA';
+    else if (/^Sovrappeso/.test(t)) l = 'SOPRAPESO';
+    else if (/^In esaurimento/.test(t)) l = 'ESAURIMENTO';
+    else if (/^Non si compra/.test(t)) l = 'NON COMPRA';
+    else if (/^BLOCCATO/.test(t)) l = 'BLOCCATO';
+    l = l.split(' (')[0]; if (l.length > 24) l = l.split(':')[0].split(',')[0];
+    if (l.length > 24) l = 'IN ATTESA';
+    return '<span class="chip ' + k + '">' + esc(l) + '</span>';
+  }
+  function vistaAzionario() {
+    if (!S.snap) return vuoto();
+    if (!S.bl) return bannerTop() + '<div class="card"><p class="muted">Servono i dati del pendolo e un patrimonio maggiore di zero.</p></div>';
+    var bl = S.bl, q = bl.quadro, h = bannerTop();
+    h += '<section class="card"><h2>Prova un ribasso</h2><div class="sim-chips">';
+    [0, -0.05, -0.10, -0.20, -0.30].forEach(function (x) { h += '<button class="sm ' + (S.shock === x ? 'on' : '') + '" data-act="shock" data-v="' + x + '">' + (x === 0 ? 'Prezzi attuali' : spc(x, 0)) + '</button>'; });
+    h += '</div><p class="note" style="margin:8px 0 0">Applica la variazione a tutti gli ETF e alle azioni, senza salvare. Mostra cosa suggerirebbe l’app dopo un crollo.</p></section>';
+    h += '<section class="card"><h2>Quadro</h2><div class="grid2">' +
+      '<div class="kpi"><div class="l">Azionario autorizzato</div><div class="v">' + eur(q.capitaleAutorizzato) + '</div></div>' +
+      '<div class="kpi"><div class="l">' + (q.bufferResiduo >= 0 ? 'Da investire (buffer)' : 'Da ridurre') + '</div><div class="v ' + (q.bufferResiduo >= 0 ? '' : 'gl-n') + '">' + eur(Math.abs(q.bufferResiduo)) + '</div></div>' +
+      '<div class="kpi"><div class="l">Acquisti suggeriti</div><div class="v gl-p">' + eur(q.acquisti) + '</div></div>' +
+      '<div class="kpi"><div class="l">Vendite suggerite</div><div class="v gl-n">' + eur(q.vendite) + '</div></div>' +
+      '<div class="kpi"><div class="l">ETF core · azioni</div><div class="v">' + eur(q.etfCore) + ' · ' + eur(q.azioni) + '</div></div>' +
+      '<div class="kpi"><div class="l">Tetto azioni (30%)</div><div class="v">' + eur(q.tettoAzioni) + '</div></div></div>' +
+      '<p class="note" style="margin:10px 0 0">' + esc(q.sintesi) + ' Acquisti di azioni già fatti nel mese: ' + eur(q.acquistiMese) + '.</p></section>';
+
+    h += '<section class="card"><h2>ETF core</h2>';
+    bl.etf.forEach(function (r) {
+      var gap = r.H, sopra = gap < 0;
+      h += '<div class="etf"><div class="hd"><b>' + esc(r.nome) + '</b>' + chipSeg(r.segnale) + '</div>';
+      h += '<div class="small" style="margin-top:2px">' + esc(r.segnale) + '</div><div class="small muted" style="margin-top:2px"><span class="num">' + eur(r.F) + '</span> su obiettivo <span class="num">' + eur(r.G) + '</span> → ' + (sopra ? 'sopra di ' : 'sotto di ') + '<b class="num">' + eur(Math.abs(gap)) + '</b>' + (r.inEsaurimento ? ' (in esaurimento)' : '') + '</div>';
+      if (r.livelli && r.dd != null && !r.inEsaurimento) {
+        h += misuraRibasso(r);
+        var nomi = S.snap.bilanciamento.parametri.fasce, lv = r.livelli;
+        var tier = r.prezzo <= lv[2] ? 3 : (r.prezzo <= lv[1] ? 2 : (r.prezzo <= lv[0] ? 1 : 0));
+        h += '<div class="small muted">Prezzo ' + dec(r.prezzo, 2) + '\u00a0\u20ac · ribasso raggiunto: <b>' + (tier ? nomi[tier - 1].nome : 'nessuno') + '</b>' + (tier && !r.AH ? ' (non compra: ' + (r.X >= q.ordineMinimo ? 'dati o capitale' : 'sopra il peso obiettivo') + ')' : '') + '</div>';
+        h += '<div class="small faint">Soglie: ' + nomi.map(function (n, i) { return n.nome + ' ' + dec(lv[i], 2); }).join(' · ') + '</div>';
+        if (tier < 3) { var pr = lv[tier]; h += '<div class="small muted" style="margin-top:2px">Prossima soglia: <b>sotto ' + dec(pr, 2) + '\u00a0\u20ac</b> (' + spc(pr / r.prezzo - 1) + ' da oggi)' + (r.X < q.ordineMinimo ? ' \u2014 ma il peso è già vicino o sopra l\u2019obiettivo: non comprerebbe' : '') + '</div>'; }
+      } else if (r.s && r.s.stato !== 'OK' && !r.inEsaurimento) {
+        h += '<div class="small muted">Dati sul ribasso: ' + esc(r.O.toLowerCase()) + (r.s.messaggio ? ' — ' + esc(r.s.messaggio) : '') + '</div>';
+      }
+      if (r.importo) {
+        var idx = bl.operazioni.findIndex(function (o) { return o.isin === r.isin; });
+        h += '<div class="row" style="margin-top:8px"><b class="' + (r.importo > 0 ? 'gl-p' : 'gl-n') + '">' + (r.importo > 0 ? 'COMPRA ' : 'VENDI ') + eur(Math.abs(r.importo)) + '</b>' + (inProva() || idx < 0 ? '' : '<button class="sm pri" data-act="regOp" data-i="' + idx + '">Registra</button>') + '</div>';
+      }
+      h += '</div>';
+    });
+    return h + '<p class="note" style="margin:0">Soglie di ribasso dal ' + dataIt(S.snap.bilanciamento.prezziDel) + '. Moderata, Forte ed Eccezionale scattano dal ribasso rispetto al massimo di 12 mesi.</p></section>' + cardAzioni() + cardSpec();
+  }
+  function cardAzioni() {
+    var bl = S.bl, q = bl.quadro, h = '<section class="card"><h2>Singole azioni<span class="faint num" style="text-transform:none;letter-spacing:0;font-weight:500">tetto ' + eur(q.tettoAzioni) + ' · max ' + eur(q.pesoMax) + ' · min ' + eur(q.pesoMin) + '</span></h2>';
+    bl.azioni.forEach(function (r) {
+      var idx = bl.operazioni.findIndex(function (o) { return o.isin === r.isin; });
+      var mt = r.margine != null ? (r.margine >= 0.3 ? 'ok' : (r.margine < 0 ? 'sell' : 'warn')) : '';
+      h += '<div class="etf"><div class="hd"><b>' + esc(r.nome) + '</b>' + chipSeg(r.segnale) + '</div>';
+      h += '<div class="chips"><span class="chip">Graham ' + dec(r.punteggio, 0) + ' · ' + esc(r.verdetto || '–') + '</span><span class="chip ' + mt + '">Margine ' + (r.margine != null ? spc(r.margine, 0) : '–') + '</span>' + (r.stato !== 'OK' ? '<span class="chip warn">dati ' + esc(r.stato.toLowerCase()) + '</span>' : '') + '</div>';
+      h += '<div class="small muted">Valore <b class="num">' + eur(r.valore) + '</b> · obiettivo <b class="num">' + eur(r.K) + '</b> · prezzo ' + dec(r.prezzo, 2) + ' €</div>';
+      h += '<div class="small faint">' + esc(r.segnale) + '</div>';
+      if (r.prezzoRinforzo != null && r.K > r.valore && r.AJ === 0) h += '<div class="small muted">Rinforzo se il prezzo scende sotto <b>' + dec(r.prezzoRinforzo, 2) + ' €</b> (margine 30%)</div>';
+      if (r.allerte) h += '<div class="small faint">' + esc(r.allerte) + '</div>';
+      if (r.N !== 0) h += '<div class="row" style="margin-top:8px"><b class="' + (r.N > 0 ? 'gl-p' : 'gl-n') + '">' + (r.N > 0 ? 'COMPRA ' : 'VENDI ') + eur(Math.abs(r.N)) + '</b>' + (inProva() || idx < 0 ? '' : '<button class="sm pri" data-act="regOp" data-i="' + idx + '">Registra</button>') + '</div>';
+      h += '</div>';
+    });
+    return h + '</section>';
+  }
+  function cardSpec() {
+    var sp = S.bl.speculativi.filter(function (s) { return s.F > 0 || s.qta > 0; });
+    if (!sp.length) return '';
+    var h = '<section class="card"><h2>Posizioni speculative</h2>';
+    sp.forEach(function (s) {
+      var idx = S.bl.operazioni.findIndex(function (o) { return o.isin === s.isin; });
+      h += '<div class="etf"><div class="hd"><b>' + esc(s.nome) + '</b><span class="chip ' + (s.AR > 0 ? 'sell' : '') + '">' + (s.AR > 0 ? 'VENDI' : 'TIENI') + '</span></div><div class="small muted">' + esc(s.segnale) + '</div>' +
+        '<div class="small faint">Valore ' + eur(s.F) + ' · costo ' + eur(s.U) + (s.BE != null ? ' · netto se vendi ora ' + sgn(s.BE) : '') + '</div>' +
+        (s.AR > 0 && !inProva() && idx >= 0 ? '<div class="row" style="margin-top:8px"><b class="gl-n">VENDI ' + eur(s.AR) + '</b><button class="sm pri" data-act="regOp" data-i="' + idx + '">Registra</button></div>' : '') + '</div>';
+    });
+    return h + '</section>';
+  }
+
+
+  /* ---------------------------------------------------------------- render */
+  function render() {
+    menu();
+    var el = $('#vista');
+    ricalcola();
+    var y = window.scrollY, v;
+    if (S.tab === 'dati') v = vistaDati();
+    else if (!S.snap || !S.U) v = vuoto();
+    else v = S.tab === 'pos' ? vistaPosizioni() : (S.tab === 'az' ? vistaAzionario() : vistaOggi());
+    el.innerHTML = v;
+    aggiornaBarra();
+    window.scrollTo(0, y);
+  }
+
+  /* ---------------------------------------------------------------- azioni sui dati */
+  function posRaw(id) { return S.U.posizioni.filter(function (p) { return p.id === id; })[0]; }
+  function impostaPosizione(id, campi) {
+    var p = posRaw(id); if (!p) return;
+    Object.assign(p, campi); p.agg = new Date().toISOString();
+    if ('prezzo' in campi) p.prezzoTs = p.agg;
+  }
+  function sheetPos(id) {
+    var p = posizioniReali().filter(function (x) { return x.id === id; })[0]; if (!p) return;
+    var liq = p.tipo === 'Liquidità', obb = p.tipo === 'Obbligazione', raw = posRaw(id);
+    var h = '<h3>' + esc(p.nome) + '</h3><p class="lead">' + esc(p.tipo) + (p.isin ? ' · ' + esc(p.isin) : '') + ' · valore ' + eur(Mo.valorePosizione(p)) + '</p><div class="fields">';
+    if (liq) h += '<div class="full"><label for="f-q">Importo in euro</label><input id="f-q" class="px" inputmode="decimal" value="' + esc(dec(p.qta, 2)) + '"></div>';
+    else {
+      h += '<div><label for="f-p">' + (obb ? 'Prezzo (% del nominale)' : 'Prezzo in euro') + '</label><input id="f-p" class="px" inputmode="decimal" value="' + esc(dec(p.prezzo, obb ? 4 : (p.prezzo < 100 ? 4 : 2))) + '"></div>';
+      h += '<div><label for="f-q">' + (obb ? 'Nominale in euro' : 'Quantità') + '</label><input id="f-q" class="px" inputmode="decimal" value="' + esc(obb ? dec(p.qta, 2) : String(p.qta).replace('.', ',')) + '"></div>';
+    }
+    h += '</div>';
+    if (!liq && !obb) h += '<label style="display:flex;gap:10px;align-items:center;margin:4px 0 10px"><input type="checkbox" id="f-m" style="width:auto;min-height:0"' + (raw.prezzoManuale ? ' checked' : '') + '> Prezzo manuale: non usare quello scaricato da Yahoo</label>';
+    h += '<p class="note" style="margin:0">' + (p.daMercato ? 'Prezzo di mercato del ' + dataIt(p.daMercato) + '. ' : '') + 'Costo di carico ' + eur(p.costo, 2) + '. Cambiare la quantità qui corregge solo il numero: per un acquisto o una vendita usa «Registra operazione», che aggiorna anche costo e liquidità.</p>';
+    h += '<div class="btns"><button data-act="chiudi">Chiudi</button><button class="pri" data-act="salvaPos" data-id="' + id + '">Salva</button></div>';
+    if (p.tipo === 'ETF' || p.tipo === 'Azione') h += '<div class="btns"><button data-act="regManuale" data-id="' + id + '">Registra operazione</button></div>';
+    apriFoglio(h);
+  }
+  function salvaPos(id) {
+    var p = posizioniReali().filter(function (x) { return x.id === id; })[0];
+    var q = parseNum($('#f-q').value), px = $('#f-p') ? parseNum($('#f-p').value) : p.prezzo;
+    if (q == null || q < 0 || px == null || px < 0) { toast('Controlla i numeri.'); return; }
+    var campi = { qta: q };
+    if (Math.abs(px - p.prezzo) > 1e-9) campi.prezzo = px;
+    if ($('#f-m')) campi.prezzoManuale = $('#f-m').checked;
+    impostaPosizione(id, campi);
+    salvaU(); chiudiFoglio(); render(); toast('Salvato.');
+  }
+  function sheetOp(def, manualeId) {
+    var verso = def ? def.verso : 'COMPRA', nome, isin, importo, prezzo;
+    if (def) { nome = def.nome; isin = def.isin; importo = def.importo; prezzo = def.prezzo; }
+    else { var p = posizioniReali().filter(function (x) { return x.id === manualeId; })[0]; nome = p.nome; isin = p.isin; importo = 500; prezzo = p.prezzo; }
+    var h = '<h3>Registra operazione</h3><p class="lead">' + esc(nome) + (def ? ' — ' + esc(def.motivo) : '') + '</p>';
+    h += '<div class="seg"><button data-act="verso" data-v="COMPRA" class="' + (verso === 'COMPRA' ? 'on' : '') + '">Acquisto</button><button data-act="verso" data-v="VENDI" class="' + (verso === 'VENDI' ? 'on' : '') + '">Vendita</button></div>';
+    h += '<div class="fields"><div><label for="o-i">Importo eseguito (€)</label><input id="o-i" class="px" inputmode="decimal" value="' + esc(dec(importo, 2)) + '"></div>' +
+      '<div><label for="o-p">Prezzo di esecuzione (€)</label><input id="o-p" class="px" inputmode="decimal" value="' + esc(dec(prezzo, 4)) + '"></div>' +
+      '<div><label for="o-c">Commissione (€)</label><input id="o-c" class="px" inputmode="decimal" value="' + esc(dec(S.snap.bilanciamento.parametri.commissione || 1, 2)) + '"></div>' +
+      '<div><label>Quantità</label><div id="o-q" class="mono" style="padding:11px 0;text-align:right"></div></div></div>';
+    h += '<p class="note" style="margin:0">Aggiorna quantità, costo di carico, prezzo e liquidità. Usalo dopo aver eseguito l’ordine nel tuo conto.</p>';
+    h += '<div class="btns"><button data-act="chiudi">Chiudi</button><button class="pri" id="o-ok" data-act="confermaOp" data-isin="' + esc(isin) + '" data-nome="' + esc(nome) + '">Registra</button></div>';
+    S._verso = verso;
+    apriFoglio(h, function () {
+      function agg() { var i = parseNum($('#o-i').value), p = parseNum($('#o-p').value); $('#o-q').textContent = (i && p) ? qta(i / p) : '–'; }
+      ['#o-i', '#o-p'].forEach(function (s) { $(s).addEventListener('input', agg); }); agg();
+    });
+  }
+  function confermaOp(isin, nome) {
+    var i = parseNum($('#o-i').value), p = parseNum($('#o-p').value), c = parseNum($('#o-c').value) || 0;
+    if (!i || i <= 0 || !p || p <= 0) { toast('Controlla importo e prezzo.'); return; }
+    var reali = posizioniReali(), nuove;
+    try { nuove = Mo.applicaOperazione(reali, { isin: isin, verso: S._verso, importo: i, prezzo: p, commissione: c }); } catch (e) { toast('Posizione non trovata.'); return; }
+    var prima = {}, adesso = new Date().toISOString();
+    nuove.forEach(function (n, k) {
+      var r = reali[k], raw = S.U.posizioni[k];
+      if (n.qta !== r.qta || n.costo !== r.costo || !!n.archiviata !== !!r.archiviata) {
+        prima[raw.id] = { qta: raw.qta, prezzo: raw.prezzo, costo: raw.costo, archiviata: !!raw.archiviata, prezzoTs: raw.prezzoTs || null };
+        raw.qta = n.qta; raw.costo = n.costo; raw.archiviata = !!n.archiviata; raw.agg = adesso;
+        if (n.tipo !== 'Liquidità') { raw.prezzo = n.prezzo; raw.prezzoTs = adesso; }
+      }
+    });
+    scriviOp({ id: 'op' + Date.now().toString(36), ts: Date.now(), isin: isin, nome: nome, verso: S._verso, importo: i, prezzo: p, quantita: i / p, commissione: c, prima: prima, annullata: false });
+    salvaU(); chiudiFoglio(); render(); toast(S._verso === 'COMPRA' ? 'Acquisto registrato.' : 'Vendita registrata.');
+  }
+  function annullaOp(id) {
+    var o = S.U.ops.filter(function (x) { return x.id === id; })[0]; if (!o) return;
+    Object.keys(o.prima || {}).forEach(function (pid) { var raw = posRaw(pid); if (raw) Object.assign(raw, o.prima[pid], { agg: new Date().toISOString() }); });
+    o.annullata = true; scriviOp(o); render(); toast('Operazione annullata.');
+  }
+  function sheetPunteggio() {
+    var pe = pendoloEffettivo(), z = S.snap.portafoglio.strategia.zonaNeutra, base = S.snap.portafoglio.pendolo;
+    var h = '<h3>Punteggio del pendolo</h3><p class="lead">Il punteggio 0–100 è calcolato ogni giorno dallo script. Se vuoi, puoi scriverne uno tuo: vale fino al prossimo mese di dati. Fuori da ' + z[0] + '–' + z[1] + ' diventa anche il riferimento; dentro la zona neutra il riferimento resta l’ultimo punteggio fuori zona (' + dec(pe.riferimento, 1) + ').</p>' +
+      '<div class="fields"><div class="full"><label for="s-p">Punteggio</label><input id="s-p" class="px" inputmode="decimal" value="' + esc(dec(pe.punteggio, 1)) + '"></div></div>' +
+      '<div class="btns"><button data-act="chiudi">Chiudi</button><button class="pri" data-act="salvaPunteggio">Salva</button></div>';
+    if (manualeValido() && isNum(base.punteggio)) h += '<div class="btns"><button class="ghost" data-act="ripristinaPunteggio">Torna al valore calcolato (' + dec(base.punteggio, 1) + ')</button></div>';
+    apriFoglio(h);
+  }
+  function salvaPunteggio() {
+    var v = parseNum($('#s-p').value); if (v == null || v < 0 || v > 100) { toast('Scrivi un numero da 0 a 100.'); return; }
+    var z = S.snap.portafoglio.strategia.zonaNeutra, pe = pendoloEffettivo(), base = S.snap.portafoglio.pendolo;
+    var fuori = v <= z[0] || v >= z[1];
+    S.U.pendoloManuale = { meseBase: base.mese, punteggio: v, riferimento: fuori ? v : pe.riferimento, riferimentoMese: fuori ? new Date().toISOString().slice(0, 10) : pe.riferimentoMese, impostatoIl: new Date().toISOString() };
+    salvaU(); chiudiFoglio(); render(); toast('Punteggio aggiornato.');
+  }
+  function sheetProva() {
+    var z = S.snap.portafoglio.strategia.zonaNeutra, cur = S.prova != null ? S.prova : S.pf.punteggioOggi;
+    var h = '<h3>Prova un altro punteggio</h3><p class="lead">Sposta il cursore per vedere come cambia l’azionario obiettivo. Non viene salvato niente.</p>' +
+      '<div id="pv-svg"></div><div class="row" style="margin:6px 0"><b class="mono" id="pv-n"></b><span class="small muted" id="pv-t"></span></div>' +
+      '<input type="range" id="pv-r" min="0" max="100" step="0.5" value="' + cur + '" aria-label="Punteggio di prova">' +
+      '<div class="btns"><button data-act="chiudi">Chiudi</button><button class="pri" data-act="applicaProva">Mostra nelle schede</button></div>';
+    apriFoglio(h, function () {
+      var curva = S.snap.portafoglio.strategia.curva;
+      function agg() {
+        var v = parseFloat($('#pv-r').value), d = Mo.dalleCurva(curva, v);
+        $('#pv-svg').innerHTML = curvaSvg(curva, v, v);
+        $('#pv-n').textContent = dec(v, 1);
+        $('#pv-t').textContent = 'azionario ' + pc(d.az, 0) + ' · obbl. ' + pc(d.ob, 0) + ' · oro ' + pc(d.oro, 1) + ' · liquidità ' + pc(d.liq, 0);
+      }
+      $('#pv-r').addEventListener('input', agg); agg();
+    });
+  }
+
+  /* ---- importazione e backup */
+  function sheetImport() {
+    var h = '<h3>' + (S.U ? 'Ripristina da file' : 'Importa il portafoglio') + '</h3><p class="lead">Scegli <b>posizioni_iniziali.json</b> oppure un backup creato da questa app.</p>' +
+      '<div class="fields"><div class="full"><label for="im-f">File</label><input id="im-f" type="file" accept=".json,application/json"></div>' +
+      '<div class="full"><label for="im-t">Oppure incolla il contenuto</label><textarea id="im-t" rows="3" placeholder="{ &quot;tipo&quot;: &quot;pendolo-backup&quot;, … }"></textarea></div></div><div id="im-r"></div>' +
+      '<div class="btns"><button data-act="chiudi">Chiudi</button><button class="pri" data-act="leggiImport">Controlla</button></div>';
+    apriFoglio(h, function () {
+      $('#im-f').addEventListener('change', function (e) { var f = e.target.files && e.target.files[0]; if (!f) return; var rd = new FileReader(); rd.onload = function () { $('#im-t').value = rd.result; leggiImport(); }; rd.readAsText(f); });
+    });
+  }
+  function leggiImport() {
+    var t = $('#im-t').value, j;
+    try { j = JSON.parse(t); } catch (e) { $('#im-r').innerHTML = '<div class="banner alert">Il file non è un JSON valido.</div>'; return; }
+    var err = validaBackup(j); if (err) { $('#im-r').innerHTML = '<div class="banner alert">' + esc(err) + '</div>'; return; }
+    S._import = j;
+    var tot = j.posizioni.filter(function (p) { return !p.archiviata; }).reduce(function (a, p) { return a + Mo.valorePosizione(p); }, 0);
+    var nOps = (j.ops || []).filter(function (o) { return !o.annullata; }).length;
+    $('#im-r').innerHTML = '<div class="banner ok"><span>' + j.posizioni.length + ' posizioni · valore ' + eur(tot) + (nOps ? ' · ' + nOps + ' operazioni registrate' : '') + (j.creato ? ' · creato il ' + dataIt(j.creato) : '') + '</span></div>' +
+      (S.U ? '<div class="banner warn" style="margin-top:8px"><span>Sostituisce quello che hai ora sul telefono (' + S.U.posizioni.length + ' posizioni, ' + S.U.ops.filter(function (o) { return !o.annullata; }).length + ' operazioni).</span></div>' : '') +
+      '<div class="btns"><button class="pri" data-act="confermaImport">' + (S.U ? 'Sostituisci' : 'Importa') + '</button></div>';
+  }
+  function confermaImport() {
+    var j = S._import; if (!j) return;
+    S.U = daBackup(j); S.prova = null; S.shock = 0; salvaU();
+    try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
+    chiudiFoglio(); S.tab = 'oggi'; render(); toast('Portafoglio importato.');
+  }
+  function backupTesto() { return JSON.stringify(esportaStato(), null, 1); }
+  function nomeBackup() { var d = new Date(); return 'pendolo-backup-' + d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) + '.json'; }
+  function copiaTesto(t, ok) {
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(function () { toast(ok); }).catch(function () {
+      apriFoglio('<h3>Copia</h3><p class="lead">Seleziona e copia.</p><pre class="log" id="cp" style="max-height:50vh;overflow:auto;white-space:pre-wrap;word-break:break-all">' + esc(t) + '</pre><div class="btns"><button data-act="chiudi">Chiudi</button></div>', function () { var r = document.createRange(); r.selectNodeContents($('#cp')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); });
+    });
+  }
+  function salvaFile(nome, testo, tipo) {
+    var blob = new Blob([testo], { type: tipo || 'application/json' });
+    try {
+      var f = new File([blob], nome, { type: blob.type });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: nome }).catch(function () { }); return; }
+    } catch (e) { }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+    toast('Backup salvato nei download.');
+  }
+
+  /* ---- collegamento a GitHub */
+  function sheetGh() {
+    var gh = leggiGh(), repo = gh.repo || repoDefault();
+    var h = '<h3>Collegamento a GitHub</h3><p class="lead">Serve solo per il pulsante «Aggiorna»: fa partire lo scarico dei dati su GitHub e aspetta il risultato. Senza collegamento l’app legge comunque i dati che GitHub scarica da solo ogni sera.</p>' +
+      '<div class="fields"><div class="full"><label for="g-r">Repository (utente/nome)</label><input id="g-r" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(repo) + '" placeholder="mario/pendolo"></div>' +
+      '<div class="full"><label for="g-t">Token (fine-grained, solo questo repository, permesso Actions: lettura e scrittura)</label><input id="g-t" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(gh.token || '') + '" placeholder="github_pat_…"></div>' +
+      '<div class="full"><label for="g-b">Ramo</label><input id="g-b" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(gh.ramo || 'main') + '"></div></div>' +
+      '<p class="note" style="margin:0">Il token resta solo su questo telefono e non può leggere né scrivere il codice: può solo far partire e leggere le Actions di quel repository.</p><div id="g-r2"></div>' +
+      '<div class="btns"><button data-act="chiudi">Chiudi</button><button data-act="provaGh">Prova</button><button class="pri" data-act="salvaGh">Salva</button></div>' +
+      (gh.token ? '<div class="btns"><button class="danger" data-act="togliGh">Scollega</button></div>' : '');
+    apriFoglio(h);
+  }
+  function leggiCampiGh() { return { repo: $('#g-r').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), token: $('#g-t').value.trim(), ramo: $('#g-b').value.trim() || 'main' }; }
+  async function provaGh() {
+    var gh = leggiCampiGh(), out = $('#g-r2');
+    if (!gh.repo || !gh.token) { out.innerHTML = '<div class="banner warn" style="margin-top:8px">Scrivi repository e token.</div>'; return; }
+    out.innerHTML = '<div class="banner sim" style="margin-top:8px">Provo…</div>';
+    try {
+      var r = await ghFetch(gh, '/repos/' + gh.repo + '/actions/workflows/aggiorna.yml');
+      out.innerHTML = r.ok ? '<div class="banner ok" style="margin-top:8px">Collegamento funzionante: trovo il flusso «aggiorna.yml».</div>' : '<div class="banner alert" style="margin-top:8px">' + esc(spiegaGh(r)) + '</div>';
+    } catch (e) { out.innerHTML = '<div class="banner alert" style="margin-top:8px">Non riesco a raggiungere GitHub. Sei offline?</div>'; }
+  }
+
+  /* ---------------------------------------------------------------- eventi */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]'); if (!b) { if (e.target.id === 'veil') chiudiFoglio(); return; }
+    var a = b.getAttribute('data-act');
+    if (a === 'tab') { S.tab = b.getAttribute('data-v'); S.modPrezzi = false; render(); window.scrollTo(0, 0); }
+    else if (a === 'vai') { S.tab = b.getAttribute('data-v'); render(); window.scrollTo(0, 0); }
+    else if (a === 'chiudi') chiudiFoglio();
+    else if (a === 'aggiorna') aggiorna(b.getAttribute('data-sez') || null, b.getAttribute('data-solo') === '1');
+    else if (a === 'esciSim') { S.prova = null; S.shock = 0; render(); }
+    else if (a === 'shock') { S.shock = parseFloat(b.getAttribute('data-v')); render(); }
+    else if (a === 'modPrezzi') { S.modPrezzi = true; render(); }
+    else if (a === 'annullaPrezzi') { S.modPrezzi = false; render(); }
+    else if (a === 'salvaPrezzi') {
+      var n = 0, ok = true, reali = posizioniReali();
+      document.querySelectorAll('[data-px]').forEach(function (inp) {
+        var id = inp.getAttribute('data-px'), p = reali.filter(function (x) { return x.id === id; })[0], v = parseNum(inp.value);
+        if (v == null || v < 0) { ok = false; return; }
+        if (p.tipo === 'Liquidità') { if (Math.abs(v - p.qta) > 0.004) { impostaPosizione(id, { qta: v }); n++; } }
+        else if (Math.abs(v - p.prezzo) > 1e-9) { impostaPosizione(id, { prezzo: v }); n++; }
+      });
+      if (!ok) { toast('Controlla i numeri.'); return; }
+      S.modPrezzi = false; if (n) salvaU(); render(); toast(n ? n + (n === 1 ? ' prezzo modificato.' : ' prezzi modificati.') : 'Nessuna modifica.');
+    }
+    else if (a === 'sheetPos') sheetPos(b.getAttribute('data-id'));
+    else if (a === 'salvaPos') salvaPos(b.getAttribute('data-id'));
+    else if (a === 'regOp') { var def = S.bl.operazioni[parseInt(b.getAttribute('data-i'), 10)]; if (def) sheetOp(def); }
+    else if (a === 'regManuale') sheetOp(null, b.getAttribute('data-id'));
+    else if (a === 'verso') { S._verso = b.getAttribute('data-v'); document.querySelectorAll('.seg button').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-v') === S._verso); }); }
+    else if (a === 'confermaOp') confermaOp(b.getAttribute('data-isin'), b.getAttribute('data-nome'));
+    else if (a === 'annullaOp') annullaOp(b.getAttribute('data-id'));
+    else if (a === 'sheetPunteggio') sheetPunteggio();
+    else if (a === 'salvaPunteggio') salvaPunteggio();
+    else if (a === 'ripristinaPunteggio') { S.U.pendoloManuale = null; salvaU(); chiudiFoglio(); render(); toast('Punteggio calcolato ripristinato.'); }
+    else if (a === 'sheetProva') sheetProva();
+    else if (a === 'applicaProva') { S.prova = parseFloat($('#pv-r').value); chiudiFoglio(); render(); }
+    else if (a === 'sheetImport') sheetImport();
+    else if (a === 'leggiImport') leggiImport();
+    else if (a === 'confermaImport') confermaImport();
+    else if (a === 'sheetGh') sheetGh();
+    else if (a === 'provaGh') provaGh();
+    else if (a === 'salvaGh') { var g = leggiCampiGh(); if (!g.repo || !g.token) { toast('Scrivi repository e token.'); return; } scriviLS(KEYGH, g); chiudiFoglio(); render(); toast('Collegamento salvato.'); }
+    else if (a === 'togliGh') { try { localStorage.removeItem(KEYGH); } catch (er) { } chiudiFoglio(); render(); toast('Scollegato.'); }
+    else if (a === 'copiaOps') copiaTesto(tsv(), 'Copiato.');
+    else if (a === 'backupCopia') copiaTesto(backupTesto(), 'Backup copiato.');
+    else if (a === 'backupSalva') salvaFile(nomeBackup(), backupTesto());
+    else if (a === 'reset') {
+      apriFoglio('<h3>Annullare le modifiche?</h3><p class="lead">Quantità, costi, prezzi inseriti e punteggio tornano a quelli dell’ultimo file importato. Le operazioni registrate restano nell’elenco, annullate.</p><div class="btns"><button data-act="chiudi">No</button><button class="pri danger" data-act="resetOk">Sì, annulla</button></div>');
+    }
+    else if (a === 'resetOk') {
+      var bs = S.U.base; if (bs) { S.U.posizioni = clona(bs.posizioni); S.U.azioniStato = clona(bs.azioniStato || {}); S.U.contatori = bs.contatori ? clona(bs.contatori) : null; }
+      S.U.pendoloManuale = null; S.U.ops.forEach(function (o) { o.annullata = true; });
+      salvaU(); chiudiFoglio(); render(); toast('Ripristinato.');
+    }
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') chiudiFoglio(); if (e.key === 'Enter' && e.target && e.target.matches && e.target.matches('input.px')) { e.target.blur(); } });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && Date.now() - (S.ultimaLettura || 0) > 30 * 60 * 1000 && !(S.agg && S.agg.attivo)) caricaDati().then(render).catch(function () { });
+  });
+
+  /* ---------------------------------------------------------------- avvio */
+  caricaLocale();
+  render();
+  S.agg = { attivo: true, msg: 'Scarico i dati…' }; aggiornaBarra();
+  caricaDati().then(function (e) { S.agg = { attivo: false, ok: e.dati }; render(); }).catch(function () { S.agg = { attivo: false, ok: false }; render(); });
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(function () { });
+  window.__pendolo = S;
+})();
+
+</script>
+</body>
+</html>
