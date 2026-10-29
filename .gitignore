@@ -1,0 +1,4 @@
+posizioni_iniziali.json
+pendolo-backup*.json
+__pycache__/
+*.pyc
